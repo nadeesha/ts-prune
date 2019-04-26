@@ -1,0 +1,16 @@
+{
+  "name": "ts-deadcode-search",
+  "version": "0.0.1",
+  "main": "lib/index.js",
+  "author": "Nadeesha Cabral <n@nadeesha.me>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^3.3.3333"
+  },
+  "dependencies": {
+    "ts-simple-ast": "^21.0.4"
+  }
+}

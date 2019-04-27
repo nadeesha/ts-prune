@@ -5,12 +5,20 @@
   "author": "Nadeesha Cabral <n@nadeesha.me>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest"
   },
   "devDependencies": {
-    "typescript": "^3.3.3333"
+    "@types/jest": "^24.0.11",
+    "@types/minimist": "^1.2.0",
+    "@types/node": "^11.13.8",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^8.1.0",
+    "typescript": "^3.3.3333",
+    "jest": "^24.7.1"
   },
   "dependencies": {
+    "minimist": "^1.2.0",
     "ts-simple-ast": "^21.0.4"
   }
 }

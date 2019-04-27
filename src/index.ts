@@ -1,4 +1,3 @@
-import { getUnused } from "./getUnused";
-import { baz } from "./unused";
+import { run } from "./runner";
 
-console.log(getUnused().join("\n"));
+run();

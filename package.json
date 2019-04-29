@@ -20,5 +20,8 @@
   "dependencies": {
     "minimist": "^1.2.0",
     "ts-simple-ast": "^21.0.4"
-  }
+  },
+  "files": [
+    "/lib"
+  ]
 }

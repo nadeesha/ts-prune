@@ -1,5 +1,5 @@
 {
-  "name": "ts-deadcode-search",
+  "name": "ts-prune",
   "version": "0.0.1",
   "main": "lib/index.js",
   "author": "Nadeesha Cabral <n@nadeesha.me>",

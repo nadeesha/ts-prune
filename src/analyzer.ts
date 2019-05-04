@@ -5,7 +5,7 @@ import {
   ts,
   TypeGuards,
   VariableStatement
-} from "ts-simple-ast";
+} from "ts-morph";
 
 const reportableNode = (
   file: SourceFile,

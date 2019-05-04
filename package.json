@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
+    "prepublich": "yarn build",
     "test": "jest"
   },
   "devDependencies": {
@@ -15,7 +16,6 @@
     "jest": "^24.7.1",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",
-    "ts-prune": "^0.0.2",
     "typescript": "^3.3.3333"
   },
   "dependencies": {

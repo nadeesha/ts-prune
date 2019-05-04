@@ -797,11 +797,6 @@ code-block-writer@8.0.0:
   resolved "https://registry.yarnpkg.com/code-block-writer/-/code-block-writer-8.0.0.tgz#bc59193040b51a3e9a9150fe12da09dc74ca2a95"
   integrity sha512-M/9eGfXHPAKBlLfcFzjvU4aKf+shHvNrFqJjI2/4A5jpY7MVgk8566FAWfWIYo/PXLZWtID91LsXOjX31rG8dQ==
 
-code-block-writer@^7.2.2:
-  version "7.2.2"
-  resolved "https://registry.yarnpkg.com/code-block-writer/-/code-block-writer-7.2.2.tgz#14ec0120de9a65d2cc5d214561d51d1660dddbb1"
-  integrity sha512-8SyXM1bWsMDCzvCoTdnDBhnnUbHntxcba4ApBIO3S3QX0M2Iq0xZCzs6SYdBOGaSUi4drysvrAK15JoXhlpsvQ==
-
 code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
@@ -3652,34 +3647,6 @@ ts-node@^8.1.0:
     make-error "^1.1.1"
     source-map-support "^0.5.6"
     yn "^3.0.0"
-
-ts-prune@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/ts-prune/-/ts-prune-0.0.2.tgz#d72c1507978b9708098850b7c1eccfd0e7ea5098"
-  integrity sha512-tMGfPM2wYbfL0JZUSTtoqxmH7H2Wk476bubAdcTBoT9qN19KHsSb6HrHdfA4RNfdg6H3X3oghL8q15OEyADOqw==
-  dependencies:
-    minimist "^1.2.0"
-    ts-simple-ast "^21.0.4"
-
-ts-simple-ast@^21.0.4:
-  version "21.0.4"
-  resolved "https://registry.yarnpkg.com/ts-simple-ast/-/ts-simple-ast-21.0.4.tgz#b1703287fa8c7f5d6a8bfbef47c1c6cc3dd43e0b"
-  integrity sha512-igAAP3SEBeH1V/G+YfRRQdHy+L3SHXlU6bknZg88s0WboFIMpD/ASiU5rsP/ryS99WiTnzbYRy4fGVk0LWrGgw==
-  dependencies:
-    "@dsherret/to-absolute-glob" "^2.0.2"
-    code-block-writer "^7.2.2"
-    fs-extra "^7.0.0"
-    glob-parent "^3.1.0"
-    globby "^8.0.1"
-    is-negated-glob "^1.0.0"
-    multimatch "^2.1.0"
-    tslib "^1.9.0"
-    typescript "^3.0.1"
-
-tslib@^1.9.0:
-  version "1.9.3"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
-  integrity sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==
 
 tunnel-agent@^0.6.0:
   version "0.6.0"

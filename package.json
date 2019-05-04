@@ -12,14 +12,15 @@
     "@types/jest": "^24.0.11",
     "@types/minimist": "^1.2.0",
     "@types/node": "^11.13.8",
+    "jest": "^24.7.1",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",
-    "typescript": "^3.3.3333",
-    "jest": "^24.7.1"
+    "ts-prune": "^0.0.2",
+    "typescript": "^3.3.3333"
   },
   "dependencies": {
     "minimist": "^1.2.0",
-    "ts-simple-ast": "^21.0.4"
+    "ts-morph": "^2.1.0"
   },
   "files": [
     "/lib"

@@ -24,5 +24,6 @@
   },
   "files": [
     "/lib"
-  ]
+  ],
+  "bin": "./lib/index.js"
 }

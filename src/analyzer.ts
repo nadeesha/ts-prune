@@ -54,7 +54,7 @@ export const analyze = (
         const analyzedNode = analyzeNode(child);
 
         if (analyzedNode.unused) {
-          return onUnusedExport(analyzeNode(child));
+          onUnusedExport(analyzeNode(child));
         }
       }
     });

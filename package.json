@@ -6,14 +6,16 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "prepublich": "yarn build",
-    "test": "jest"
+    "prepublish": "yarn build",
+    "test": "jest",
+    "publish": "np"
   },
   "devDependencies": {
     "@types/jest": "^24.0.11",
     "@types/minimist": "^1.2.0",
     "@types/node": "^11.13.8",
     "jest": "^24.7.1",
+    "np": "^5.0.1",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",
     "typescript": "^3.3.3333"

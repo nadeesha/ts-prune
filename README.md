@@ -36,9 +36,23 @@ If you want to run against different Typescript configuration than tsconfig.json
 ts-prune -p tsconfig.dev.json
 ```
 
+### FAQ
+
+1. How do I get the count of unused exports?
+
+```sh
+ts-prune | wc -l
+```
+
+2. How do I ignore a specific path?
+
+```sh
+ts-prune | grep -v src/ignore-this-path
+```
+
 ### Acknowledgements
 
-- The excellent [ts-morph](https://github.com/dsherret/ts-morph) library.
+- The excellent [ts-morph](https://github.com/dsherret/ts-morph) library. And [this gist](https://gist.github.com/dsherret/0bae87310ce24866ae22425af80a9864) by @dsherret.
 
 ### Licence
 

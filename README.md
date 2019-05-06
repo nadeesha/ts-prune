@@ -2,7 +2,7 @@
 
 Remove unused exports in your Typescript project with zero configuration.
 
-[![asciicast](https://asciinema.org/a/244689.svg)](https://asciinema.org/a/244689)
+[![asciicast](https://asciinema.org/a/liQKNmkGkedCnyHuJzzgu7uDI.svg)](https://asciinema.org/a/liQKNmkGkedCnyHuJzzgu7uDI)
 
 ## Getting Started
 

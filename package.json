@@ -1,6 +1,6 @@
 {
   "name": "ts-prune",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "lib/index.js",
   "author": "Nadeesha Cabral <n@nadeesha.me>",
   "license": "MIT",

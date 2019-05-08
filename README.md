@@ -38,16 +38,22 @@ ts-prune -p tsconfig.dev.json
 
 ### FAQ
 
-1. How do I get the count of unused exports?
+#### How do I get the count of unused exports?
 
 ```sh
 ts-prune | wc -l
 ```
 
-2. How do I ignore a specific path?
+#### How do I ignore a specific path?
 
 ```sh
 ts-prune | grep -v src/ignore-this-path
+```
+
+#### How do I ignore a specific identifier?
+
+```sh
+ts-prune | grep -v ignoredExport
 ```
 
 ### Acknowledgements

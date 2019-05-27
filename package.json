@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "prepublish": "rm -rf lib && yarn build",
-    "test": "jest"
+    "test": "jest",
+    "benchmark": "sh test/benchmark.sh"
   },
   "devDependencies": {
     "@types/jest": "^24.0.11",
@@ -25,5 +26,6 @@
   "files": [
     "/lib"
   ],
-  "bin": "./lib/index.js"
+  "bin": "./lib/index.js",
+  "repository": "git@github.com:nadeesha/ts-prune.git"
 }

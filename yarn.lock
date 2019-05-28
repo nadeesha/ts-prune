@@ -3623,10 +3623,10 @@ ts-jest@^24.0.2:
     semver "^5.5"
     yargs-parser "10.x"
 
-ts-morph@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/ts-morph/-/ts-morph-2.1.0.tgz#a899b3fe284a72090f73c4d6a7f82e4168667abd"
-  integrity sha512-1DqAp8mVBb8jx3ohfPAiUT7gIEcDPuY3lg8QYlZIAQ6FuWqCzLNc4ZdAfF+nlLghkev2gnvqdqdQQxCO8ynKjw==
+ts-morph@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/ts-morph/-/ts-morph-2.2.0.tgz#fdd8f7e88ef47a33489c7b677ab1705a77bb29f9"
+  integrity sha512-mKt4edfw6/c0iGx6+SOrDiPMay/3PzuFbufJa6i7UNO1h0E0qIHpLZiEkzRo2LBypuBe8haL+kOpj9Ro8d3Rcw==
   dependencies:
     "@dsherret/to-absolute-glob" "^2.0.2"
     code-block-writer "8.0.0"

@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "minimist": "^1.2.0",
-    "ts-morph": "^2.1.0"
+    "ts-morph": "^2.2.0"
   },
   "files": [
     "/lib"

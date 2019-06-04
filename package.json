@@ -12,7 +12,7 @@
   "devDependencies": {
     "@types/jest": "^24.0.13",
     "@types/minimist": "^1.2.0",
-    "@types/node": "^11.13.8",
+    "@types/node": "^11.13.11",
     "jest": "^24.7.1",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",

@@ -43,3 +43,4 @@ test/*.js
 test/src
 test/package.json
 test/tsconfig.json
+test/testproject

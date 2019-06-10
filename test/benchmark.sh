@@ -1,30 +1,21 @@
 #!/bin/bash
 
 # increment this on any change to the current script
-BENCHMARK_SCRIPT_VERSION="0"
+BENCHMARK_SCRIPT_VERSION="4"
 
 echo "1. Creating npm link to the current working tree"
 npm link
 
 cd "$(dirname "$0")"
 
-echo "2. Initializing package.json and tsconfig.json"
-yarn init -y
-cp ../tsconfig.json ./tsconfig.json
+echo "2. Initializing test repository"
+rm -rf testproject
+git clone git@github.com:gcanti/fp-ts.git testproject
+cd testproject
+git checkout 3ce5cb0e02fdafd1cc66e5e868b942d61402c98e
 
 echo "3. Linking ts-prune from step 1"
 npm link ts-prune
-
-echo "4. Generating files in the src..."
-rm -rf src
-mkdir src
-cp 0.template src/0.ts
-
-for n in {1..1000}
-do
-  let REFER_TO=n-1
-  cat testFileContent.template | sed "s/__n__/$REFER_TO/g" > "src/$n.ts"
-done
 
 echo "5. Run ts-prune"
 TIME_START=`date +%s`

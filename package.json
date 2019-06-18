@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.13",
+    "@types/jest": "^24.0.15",
     "@types/minimist": "^1.2.0",
     "@types/node": "^11.13.11",
     "jest": "^24.7.1",

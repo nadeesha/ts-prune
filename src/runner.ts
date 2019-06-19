@@ -1,5 +1,6 @@
 import * as minimist from "minimist";
 import * as path from "path";
+import { filter } from "rxjs/operators";
 
 import { analyze } from "./analyzer";
 import { initialize } from "./initializer";
@@ -15,7 +16,7 @@ export const run = (
     outputStream
   );
 
-  analyze(project, node =>
-    writer(`${node.identifier} @ ${node.filePath}:${node.lineNumber}\n`)
-  );
+  analyze(project)
+    .pipe(filter(val => val.unused.length > 0))
+    .subscribe(value => console.log(value));
 };

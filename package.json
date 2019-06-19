@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "minimist": "^1.2.0",
+    "rxjs": "^6.5.2",
     "ts-morph": "^2.1.0"
   },
   "files": [

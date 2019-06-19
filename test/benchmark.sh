@@ -3,16 +3,19 @@
 # increment this on any change to the current script
 BENCHMARK_SCRIPT_VERSION="4"
 
+echo "0. Building current source"
+yarn build
+
 echo "1. Creating npm link to the current working tree"
 npm link
 
 cd "$(dirname "$0")"
 
-echo "2. Initializing test repository"
-rm -rf testproject
-git clone git@github.com:gcanti/fp-ts.git testproject
+# echo "2. Initializing test repository"
+# rm -rf testproject
+# git clone git@github.com:gcanti/fp-ts.git testproject
 cd testproject
-git checkout 3ce5cb0e02fdafd1cc66e5e868b942d61402c98e
+# git checkout 3ce5cb0e02fdafd1cc66e5e868b942d61402c98e
 
 echo "3. Linking ts-prune from step 1"
 npm link ts-prune

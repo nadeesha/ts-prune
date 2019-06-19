@@ -1,76 +1,71 @@
+import { Observable } from "rxjs";
 import {
+  ImportDeclaration,
   Node,
   Project,
   SourceFile,
+  SourceFileReferencingNodes,
   ts,
-  TypeGuards,
-  VariableStatement
+  TypeGuards
 } from "ts-morph";
 
-const reportableNode = (
-  file: SourceFile,
-  node: Node<ts.Node>,
-  unused: boolean
-) => {
-  return {
-    unused,
-    filePath: file.getFilePath(),
-    lineNumber: node.getStartLineNumber(),
-    identifier: TypeGuards.hasName(node) ? node.getName() : node.getText()
-  };
+const SymbolAnalysis = () => ({
+  referenced: new Set<string>(),
+  exported: new Set<string>()
+});
+
+function handleImportDeclaration(node: SourceFileReferencingNodes) {
+  const referenced = new Set<string>();
+
+  (node as ImportDeclaration)
+    .getNamedImports()
+    .map(n => referenced.add(n.getName()));
+
+  const defaultImport = (node as ImportDeclaration).getDefaultImport();
+
+  if (defaultImport) {
+    referenced.add("default");
+  }
+
+  return referenced;
+}
+
+const nodeHandlers = {
+  [ts.SyntaxKind.ImportDeclaration.toString()]: handleImportDeclaration
 };
 
-const analyzeNode = (node: Node<ts.Node>) => {
-  const file = node.getSourceFile();
+function getExported(file: SourceFile) {
+  const exported = new Set<string>();
 
-  const used =
-    !TypeGuards.isReferenceFindableNode(node) ||
-    node.findReferencesAsNodes().some(n => n.getSourceFile() !== file);
-
-  return reportableNode(file, node, !used);
-};
-
-const isExported = (node: Node<ts.Node>) => {
-  return TypeGuards.isExportableNode(node) && node.isExported();
-};
-
-const isImported = (node: Node<ts.Node>) => {
-  return TypeGuards.isImportDeclaration(node);
-};
-
-const isVariable = (node: Node<ts.Node>) =>
-  TypeGuards.isVariableStatement(node);
-
-const symbolMap = new Map();
-
-const symbolId = (node: Node<ts.Node>, file: SourceFile) =>
-  [file.getFilePath(), node.getSourceFile().getStartLineNumber()].join(".");
-
-export const analyze = (
-  project: Project,
-  onUnusedExport: (node: ReturnType<typeof reportableNode>) => void
-) => {
-  project.getSourceFiles().forEach(file => {
-    console.log(file.getChildCount());
-
-    file.forEachChild(symbolInFile => {
-      if (isExported(symbolInFile)) {
-        const exportedSymbol = symbolInFile;
-
-        const identifier = symbolId(exportedSymbol, file);
-        symbolMap.set(identifier, symbolMap.get(identifier) || 0);
-      }
-
-      if (isImported(symbolInFile)) {
-        const importedSymbol = symbolInFile;
-        const file = importedSymbol.getSourceFile();
-
-        const identifier = symbolId(importedSymbol, file);
-        const useCount = (symbolMap.get(identifier) || 0) + 1;
-        symbolMap.set(identifier, useCount);
-      }
-    });
+  file.getExportSymbols().map(symbol => {
+    exported.add(symbol.compilerSymbol.name);
   });
 
-  symbolMap.forEach((value, key) => console.log(key));
-};
+  return exported;
+}
+
+export const analyze = (project: Project) =>
+  new Observable<{ file: string; unused: string[] }>(subscriber => {
+    project.getSourceFiles().forEach(file => {
+      const exported = getExported(file);
+      const referenced = new Set();
+
+      file
+        .getReferencingNodesInOtherSourceFiles()
+        .map((node: SourceFileReferencingNodes) => {
+          const handler =
+            nodeHandlers[node.getKind().toString()] ||
+            function noop() {
+              return new Set();
+            };
+
+          return handler(node);
+        });
+
+      const unused = [...exported].filter(
+        exported => !referenced.has(exported)
+      );
+
+      subscriber.next({ file: file.getFilePath(), unused });
+    });
+  });

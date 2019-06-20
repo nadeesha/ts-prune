@@ -16,10 +16,11 @@ jobs:
           - v1-dependencies-{{ checksum "package.json" }}
           - v1-dependencies-
 
-      - run: npm install
+      - run: yarn install
+      
       - run:
           name: Run tests
-          command: npm test
+          command: yarn test
 
       - save_cache:
           paths:

@@ -1,62 +1,71 @@
+import { Observable } from "rxjs";
 import {
+  ImportDeclaration,
   Node,
   Project,
   SourceFile,
+  SourceFileReferencingNodes,
   ts,
-  TypeGuards,
-  VariableStatement
+  TypeGuards
 } from "ts-morph";
 
-const reportableNode = (
-  file: SourceFile,
-  node: Node<ts.Node>,
-  unused: boolean
-) => {
-  return {
-    unused,
-    filePath: file.getFilePath(),
-    lineNumber: node.getStartLineNumber(),
-    identifier: TypeGuards.hasName(node) ? node.getName() : node.getText()
-  };
+const SymbolAnalysis = () => ({
+  referenced: [] as string[],
+  exported: [] as string[]
+});
+
+function handleImportDeclaration(node: SourceFileReferencingNodes) {
+  const referenced = [] as string[];
+
+  (node as ImportDeclaration)
+    .getNamedImports()
+    .map(n => referenced.push(n.getName()));
+
+  const defaultImport = (node as ImportDeclaration).getDefaultImport();
+
+  if (defaultImport) {
+    referenced.push("default");
+  }
+
+  return referenced;
+}
+
+const nodeHandlers = {
+  [ts.SyntaxKind.ImportDeclaration.toString()]: handleImportDeclaration
 };
 
-const analyzeNode = (node: Node<ts.Node>) => {
-  const used =
-    !TypeGuards.isReferenceFindableNode(node) ||
-    node.findReferencesAsNodes().filter(n => n.getSourceFile() !== file)
-      .length > 0;
+function getExported(file: SourceFile) {
+  const exported: string[] = [];
 
-  const file = node.getSourceFile();
+  file.getExportSymbols().map(symbol => {
+    exported.push(symbol.compilerSymbol.name);
+  });
 
-  return reportableNode(file, node, !used);
-};
+  return exported;
+}
 
-const isExported = (node: Node<ts.Node>) => {
-  return TypeGuards.isExportableNode(node) && node.isExported();
-};
+export const analyze = (project: Project) =>
+  new Observable<{ file: string; unused: string[] }>(subscriber => {
+    project.getSourceFiles().forEach(file => {
+      const exported = getExported(file);
+      // const referenced: string[] = [];
 
-const isVariable = (node: Node<ts.Node>) =>
-  TypeGuards.isVariableStatement(node);
+      const referenced2D = file
+        .getReferencingNodesInOtherSourceFiles()
+        .map((node: SourceFileReferencingNodes) => {
+          const handler =
+            nodeHandlers[node.getKind().toString()] ||
+            function noop() {
+              return [] as string[];
+            };
 
-export const analyze = (
-  project: Project,
-  onUnusedExport: (node: ReturnType<typeof reportableNode>) => void
-) => {
-  project.getSourceFiles().forEach(file => {
-    file.forEachChild(child => {
-      if (isVariable(child) && isExported(child)) {
-        (child as VariableStatement)
-          .getDeclarations()
-          .map(analyzeNode)
-          .filter(node => node.unused)
-          .forEach(onUnusedExport);
-      } else if (isExported(child)) {
-        const analyzedNode = analyzeNode(child);
+          return handler(node);
+        });
 
-        if (analyzedNode.unused) {
-          onUnusedExport(analyzeNode(child));
-        }
-      }
+      const referenced = ([] as string[]).concat(...referenced2D);
+
+      const unused = exported.filter(exp => !referenced.includes(exp));
+
+      subscriber.next({ file: file.getFilePath(), unused });
     });
   });
-};

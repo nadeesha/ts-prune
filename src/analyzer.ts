@@ -10,21 +10,21 @@ import {
 } from "ts-morph";
 
 const SymbolAnalysis = () => ({
-  referenced: new Set<string>(),
-  exported: new Set<string>()
+  referenced: [] as string[],
+  exported: [] as string[]
 });
 
 function handleImportDeclaration(node: SourceFileReferencingNodes) {
-  const referenced = new Set<string>();
+  const referenced = [] as string[];
 
   (node as ImportDeclaration)
     .getNamedImports()
-    .map(n => referenced.add(n.getName()));
+    .map(n => referenced.push(n.getName()));
 
   const defaultImport = (node as ImportDeclaration).getDefaultImport();
 
   if (defaultImport) {
-    referenced.add("default");
+    referenced.push("default");
   }
 
   return referenced;
@@ -35,10 +35,10 @@ const nodeHandlers = {
 };
 
 function getExported(file: SourceFile) {
-  const exported = new Set<string>();
+  const exported: string[] = [];
 
   file.getExportSymbols().map(symbol => {
-    exported.add(symbol.compilerSymbol.name);
+    exported.push(symbol.compilerSymbol.name);
   });
 
   return exported;
@@ -48,23 +48,23 @@ export const analyze = (project: Project) =>
   new Observable<{ file: string; unused: string[] }>(subscriber => {
     project.getSourceFiles().forEach(file => {
       const exported = getExported(file);
-      const referenced = new Set();
+      // const referenced: string[] = [];
 
-      file
+      const referenced2D = file
         .getReferencingNodesInOtherSourceFiles()
         .map((node: SourceFileReferencingNodes) => {
           const handler =
             nodeHandlers[node.getKind().toString()] ||
             function noop() {
-              return new Set();
+              return [] as string[];
             };
 
           return handler(node);
         });
 
-      const unused = [...exported].filter(
-        exported => !referenced.has(exported)
-      );
+      const referenced = ([] as string[]).concat(...referenced2D);
+
+      const unused = exported.filter(exp => !referenced.includes(exp));
 
       subscriber.next({ file: file.getFilePath(), unused });
     });

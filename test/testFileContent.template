@@ -1,7 +1,0 @@
-import { bar as barImported } from "./__n__";
-
-const foo = 1;
-
-export const bar = barImported + 2;
-
-export const baz = 3;

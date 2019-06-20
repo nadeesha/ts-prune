@@ -8,7 +8,7 @@
     "build": "tsc",
     "prepublish": "rm -rf lib && yarn build",
     "test": "jest",
-    "benchmark": "sh test/benchmark.sh"
+    "test:integration": "sh integration/test.sh"
   },
   "devDependencies": {
     "@types/jest": "^24.0.11",

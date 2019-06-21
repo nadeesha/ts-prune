@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# increment this on any change to the current script
-BENCHMARK_SCRIPT_VERSION="4"
-
 echo "1. Creating npm link to the current working tree"
 npm link
 
@@ -14,3 +11,5 @@ npm link ts-prune
 
 echo "4. Run ts-prune"
 ts-prune
+
+# TODO: write suitable assertion

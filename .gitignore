@@ -38,9 +38,3 @@ typings/
 lib/*.js
 test/*.js
 *.map
-
-# benchmark source files
-test/src
-test/package.json
-test/tsconfig.json
-test/testproject

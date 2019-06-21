@@ -1,4 +1,5 @@
-import { run } from "./runner";
+import { run, createExecPipeline } from "./runner";
+import { map } from "rxjs/operators";
 
 export function unusedFooFunction() {
   return "bar";
@@ -10,20 +11,17 @@ export function unusedBarFunction() {
 
 describe("runner", () => {
   it("should find the unused unusedFooFunction and unusedBarFunction exports", () => {
-    const mockWriter: any = {
-      write: jest.fn()
-    };
+    const pipeline = createExecPipeline();
 
-    run([], mockWriter);
+    const assertOutputContainsUnusedFunctions = (output = "") =>
+      [unusedFooFunction.name, unusedBarFunction.name].forEach(
+        unusedFunctionName => {
+          JSON.stringify(output).includes(unusedFunctionName);
+        }
+      );
 
-    expect(mockWriter.write).toHaveBeenCalledTimes(2);
-
-    expect(mockWriter.write.mock.calls[0][0]).toMatch(
-      "unusedFooFunction @ /Users/nadeesha/ts-deadcode-search/src/runner.test.ts:3"
-    );
-
-    expect(mockWriter.write.mock.calls[1][0]).toMatch(
-      "unusedBarFunction @ /Users/nadeesha/ts-deadcode-search/src/runner.test.ts:7"
-    );
+    pipeline
+      .pipe(map(output => JSON.stringify(output)))
+      .subscribe(assertOutputContainsUnusedFunctions);
   });
 });

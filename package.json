@@ -1,29 +1,32 @@
 {
   "name": "ts-prune",
-  "version": "0.0.7",
+  "version": "0.1.1",
   "main": "lib/index.js",
   "author": "Nadeesha Cabral <n@nadeesha.me>",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
     "prepublish": "rm -rf lib && yarn build",
-    "test": "jest"
+    "test": "jest",
+    "test:integration": "sh integration/test.sh"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.13",
+    "@types/jest": "^24.0.15",
     "@types/minimist": "^1.2.0",
     "@types/node": "^11.13.11",
-    "jest": "^24.7.1",
+    "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
-    "ts-node": "^8.1.0",
+    "ts-node": "^8.3.0",
     "typescript": "^3.5.2"
   },
   "dependencies": {
     "minimist": "^1.2.0",
-    "ts-morph": "^2.1.0"
+    "rxjs": "^6.5.2",
+    "ts-morph": "^2.3.0"
   },
   "files": [
     "/lib"
   ],
-  "bin": "./lib/index.js"
+  "bin": "./lib/index.js",
+  "repository": "git@github.com:nadeesha/ts-prune.git"
 }

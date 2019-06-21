@@ -6,7 +6,7 @@
     "preserveConstEnums": true,
     "outDir": "lib",
     "sourceMap": true,
-    "lib": ["es2017", "dom"],
+    "lib": ["es2017"],
     "downlevelIteration": true
   },
   "include": ["src/**/*"],

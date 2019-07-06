@@ -1,18 +1,23 @@
-import { Observable } from "rxjs";
 import {
   ImportDeclaration,
-  Node,
   Project,
   SourceFile,
   SourceFileReferencingNodes,
-  ts,
-  TypeGuards
+  ts
 } from "ts-morph";
 
-const SymbolAnalysis = () => ({
-  referenced: [] as string[],
-  exported: [] as string[]
-});
+type OnResultType = (result: IAnalysedResult) => void;
+
+export enum AnalysisResultTypeEnum {
+  POTENTIALLY_UNUSED,
+  DEFINITELY_USED
+}
+
+export interface IAnalysedResult {
+  file: string;
+  type: AnalysisResultTypeEnum;
+  symbols: Array<string>;
+}
 
 function handleImportDeclaration(node: SourceFileReferencingNodes) {
   const referenced = [] as string[];
@@ -44,28 +49,51 @@ function getExported(file: SourceFile) {
   return exported;
 }
 
-export const analyze = (project: Project) =>
-  new Observable<{ file: string; unused: string[] }>(subscriber => {
-    project.getSourceFiles().forEach(file => {
-      const exported = getExported(file);
-      // const referenced: string[] = [];
+const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
+  file.getImportDeclarations().forEach(decl => {
+    const containsWildcardImport = decl
+      .getImportClause()
+      .getText()
+      .includes("*");
 
-      const referenced2D = file
-        .getReferencingNodesInOtherSourceFiles()
-        .map((node: SourceFileReferencingNodes) => {
-          const handler =
-            nodeHandlers[node.getKind().toString()] ||
-            function noop() {
-              return [] as string[];
-            };
-
-          return handler(node);
-        });
-
-      const referenced = ([] as string[]).concat(...referenced2D);
-
-      const unused = exported.filter(exp => !referenced.includes(exp));
-
-      subscriber.next({ file: file.getFilePath(), unused });
-    });
+    if (containsWildcardImport) {
+      onResult({
+        file: decl.getModuleSpecifierSourceFile().getFilePath(),
+        symbols: [],
+        type: AnalysisResultTypeEnum.DEFINITELY_USED
+      });
+    }
   });
+};
+
+const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
+  const exported = getExported(file);
+
+  const referenced2D = file
+    .getReferencingNodesInOtherSourceFiles()
+    .map((node: SourceFileReferencingNodes) => {
+      const handler =
+        nodeHandlers[node.getKind().toString()] ||
+        function noop() {
+          return [] as string[];
+        };
+      return handler(node);
+    });
+
+  const referenced = ([] as string[]).concat(...referenced2D);
+
+  const unused = exported.filter(exp => !referenced.includes(exp));
+
+  onResult({
+    file: file.getFilePath(),
+    symbols: unused,
+    type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED
+  });
+};
+
+export const analyze = (project: Project, onResult: OnResultType) => {
+  project.getSourceFiles().forEach(file => {
+    emitPotentiallyUnused(file, onResult);
+    emitDefinitelyUsed(file, onResult);
+  });
+};

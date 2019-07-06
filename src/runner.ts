@@ -1,29 +1,20 @@
-import * as minimist from "minimist";
-import * as path from "path";
-import { filter, map, flatMap } from "rxjs/operators";
+import minimist from "minimist";
+import path from "path";
 
 import { analyze } from "./analyzer";
 import { initialize } from "./initializer";
-import { writer as lineWriter } from "./io";
+import { State } from "./state";
+import { present } from "./presenter";
 
-export const createExecPipeline = (tsconfigPath = "tsconfig.json") => {
-  const { project } = initialize(path.join(process.cwd(), tsconfigPath));
+export const run = (argv = process.argv.slice(2), output = console.log) => {
+  const tsConfigPath = minimist(argv).p || "tsconfig.json";
+  const { project } = initialize(path.join(process.cwd(), tsConfigPath));
 
-  return analyze(project)
-    .pipe(filter(val => val.unused.length > 0))
-    .pipe(
-      map(({ unused, file }) =>
-        unused.map(symbol => [file, symbol].join(" ... "))
-      )
-    );
-};
+  const state = new State();
 
-export const run = (
-  argv = process.argv.slice(2),
-  outputStream = process.stdout
-) => {
-  const writeLine = lineWriter(outputStream);
-  const pipeline = createExecPipeline(minimist(argv).p);
+  analyze(project, state.onResult);
 
-  pipeline.subscribe(lines => lines.map(writeLine));
+  present(state).map(value => {
+    output(value);
+  });
 };

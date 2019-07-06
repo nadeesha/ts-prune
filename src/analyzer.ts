@@ -1,4 +1,3 @@
-import { Observable, Subscriber } from "rxjs";
 import {
   ImportDeclaration,
   Project,
@@ -51,8 +50,6 @@ function getExported(file: SourceFile) {
 }
 
 const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
-  const text = file.getText();
-
   file.getImportDeclarations().forEach(decl => {
     const containsWildcardImport = decl
       .getImportClause()

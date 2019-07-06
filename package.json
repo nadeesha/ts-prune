@@ -7,14 +7,18 @@
   "scripts": {
     "build": "tsc",
     "prepublish": "rm -rf lib && yarn build",
+    "pretest": "npm run lint",
     "test": "jest",
-    "test:integration": "sh integration/test.sh"
+    "test:integration": "sh integration/test.sh",
+    "lint": "eslint . --cache --fix --ext .ts,.tsx"
   },
   "devDependencies": {
     "@types/jest": "^24.0.15",
     "@types/lodash": "^4.14.135",
     "@types/minimist": "^1.2.0",
     "@types/node": "^11.13.11",
+    "@typescript-eslint/parser": "^1.11.0",
+    "eslint": "^6.0.1",
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.3.0",

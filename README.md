@@ -58,7 +58,7 @@ ts-prune | grep -v ignoredExport
 
 ### Acknowledgements
 
-- The excellent [ts-morph](https://github.com/dsherret/ts-morph) library. And [this gist](https://gist.github.com/dsherret/0bae87310ce24866ae22425af80a9864) by @dsherret.
+- The excellent [ts-morph](https://github.com/dsherret/ts-morph) library. And [this gist](https://gist.github.com/dsherret/0bae87310ce24866ae22425af80a9864) by [@dsherret](https://github.com/dsherret).
 
 ### Licence
 

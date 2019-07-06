@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
+    "target": "es5",
     "module": "commonjs",
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
     "outDir": "lib",
     "sourceMap": true,
-    "lib": ["es2017"],
-    "downlevelIteration": true
+    "lib": ["esnext"],
+    "esModuleInterop": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/index.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

@@ -15,7 +15,6 @@ export const run = (argv = process.argv.slice(2), output = console.log) => {
   analyze(project, state.onResult);
 
   present(state).map(value => {
-    console.log(value);
     output(value);
   });
 };

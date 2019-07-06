@@ -8,7 +8,7 @@
     "build": "tsc",
     "prepublish": "rm -rf lib && yarn build",
     "pretest": "npm run lint",
-    "test": "jest",
+    "test": "jest --coverage",
     "test:integration": "sh integration/test.sh",
     "lint": "eslint . --cache --fix --ext .ts,.tsx"
   },

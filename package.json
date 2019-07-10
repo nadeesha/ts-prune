@@ -25,7 +25,7 @@
     "typescript": "^3.5.2"
   },
   "dependencies": {
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.14",
     "minimist": "^1.2.0",
     "ts-morph": "^2.3.0"
   },

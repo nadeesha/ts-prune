@@ -1,6 +1,6 @@
 {
   "name": "ts-prune",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "lib/index.js",
   "author": "Nadeesha Cabral <n@nadeesha.me>",
   "license": "MIT",
@@ -25,8 +25,9 @@
     "typescript": "^3.5.2"
   },
   "dependencies": {
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.14",
     "minimist": "^1.2.0",
+    "true-myth": "^3.0.0",
     "ts-morph": "^2.3.0"
   },
   "files": [

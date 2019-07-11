@@ -5,6 +5,7 @@ import {
   SourceFileReferencingNodes,
   ts
 } from "ts-morph";
+import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -51,12 +52,7 @@ function getExported(file: SourceFile) {
 
 const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
   file.getImportDeclarations().forEach(decl => {
-    const containsWildcardImport = decl
-      .getImportClause()
-      .getText()
-      .includes("*");
-
-    if (containsWildcardImport) {
+    if (isDefinitelyUsedImport(decl)) {
       onResult({
         file: decl.getModuleSpecifierSourceFile().getFilePath(),
         symbols: [],

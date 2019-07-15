@@ -6,7 +6,7 @@ export const present = (state: State) => {
     .definitelyUnused()
     .filter(result => result.symbols.length > 0)
     .map(result => ({
-      file: result.file.replace(process.cwd(), ""),
+      file: result.file.replace(process.cwd(), "."),
       symbols: result.symbols
     }))
     .map(result => {

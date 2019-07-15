@@ -6,6 +6,7 @@ import {
   ts
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
+import { getModuleSourceFile } from "./util/getModuleSourceFile";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -51,15 +52,20 @@ function getExported(file: SourceFile) {
 }
 
 const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
-  file.getImportDeclarations().forEach(decl => {
-    if (isDefinitelyUsedImport(decl)) {
+  file
+    .getImportDeclarations()
+    .map(decl => ({
+      moduleSourceFile: getModuleSourceFile(decl),
+      definitelyUsed: isDefinitelyUsedImport(decl)
+    }))
+    .filter(meta => meta.definitelyUsed && !!meta.moduleSourceFile)
+    .forEach(({ moduleSourceFile }) => {
       onResult({
-        file: decl.getModuleSpecifierSourceFile().getFilePath(),
+        file: moduleSourceFile,
         symbols: [],
         type: AnalysisResultTypeEnum.DEFINITELY_USED
       });
-    }
-  });
+    });
 };
 
 const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {

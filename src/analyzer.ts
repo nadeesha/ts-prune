@@ -1,4 +1,5 @@
 import {
+  ExportDeclaration,
   ImportDeclaration,
   Project,
   SourceFile,
@@ -21,6 +22,10 @@ export interface IAnalysedResult {
   symbols: Array<string>;
 }
 
+function handleExportDeclaration(node: SourceFileReferencingNodes) {
+  return (node as ExportDeclaration).getNamedExports().map(n => n.getName());
+}
+
 function handleImportDeclaration(node: SourceFileReferencingNodes) {
   const referenced = [] as string[];
 
@@ -38,6 +43,7 @@ function handleImportDeclaration(node: SourceFileReferencingNodes) {
 }
 
 const nodeHandlers = {
+  [ts.SyntaxKind.ExportDeclaration.toString()]: handleExportDeclaration,
   [ts.SyntaxKind.ImportDeclaration.toString()]: handleImportDeclaration
 };
 

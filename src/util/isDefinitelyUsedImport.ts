@@ -4,7 +4,7 @@ import identity from "lodash/fp/identity";
 
 const containsWildcardImport = (decl: ImportDeclaration) =>
   Maybe.of(decl.getImportClause())
-    .mapOr("", clause => clause.getText())
+    .mapOr("" as string, clause => clause.getText())
     .includes("*");
 
 const containsUnnamedImport = (decl: ImportDeclaration) =>

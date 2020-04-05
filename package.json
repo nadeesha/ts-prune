@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.14",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "true-myth": "^3.0.0",
     "ts-morph": "^2.3.0"
   },

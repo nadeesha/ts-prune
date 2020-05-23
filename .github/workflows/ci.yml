@@ -12,26 +12,16 @@ jobs:
         with:
           node-version: "12"
       - name: Install dependencies
-        uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: install
+        run: yarn install
       - name: Build typescript
-        uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: build
+        run: yarn build
       - name: Unit tests
-        uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: test
+        run: yarn test
       - name: Integration tests
-        uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: test:integration
+        run: yarn test:integration
       - name: Publish to NPM
         if: github.ref == 'refs/heads/master'
-        uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: semantic-release
+        run: yarn semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

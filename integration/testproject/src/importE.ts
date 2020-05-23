@@ -1,1 +1,1 @@
-import { KualaOrLumpur } from './barrel';
+import * as barrel from './barrel';

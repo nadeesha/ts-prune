@@ -7,6 +7,7 @@ const containsWildcardImport = (decl: ImportDeclaration) =>
     .mapOr("" as string, clause => clause.getText())
     .includes("*");
 
+
 const containsUnnamedImport = (decl: ImportDeclaration) =>
   !decl.getImportClause();
 

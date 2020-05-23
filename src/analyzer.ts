@@ -57,7 +57,7 @@ function getExported(file: SourceFile) {
   return exported;
 }
 
-const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
+const importWildCards = (file: SourceFile) =>
   file
     .getImportDeclarations()
     .map(decl => ({
@@ -65,24 +65,27 @@ const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
       definitelyUsed: isDefinitelyUsedImport(decl)
     }))
     .filter(meta => meta.definitelyUsed && !!meta.moduleSourceFile)
-    .forEach(({ moduleSourceFile }) => {
-      onResult({
-        file: moduleSourceFile,
-        symbols: [],
-        type: AnalysisResultTypeEnum.DEFINITELY_USED
-      });
-    });
+    .map(({ moduleSourceFile }) => ({
+      file: moduleSourceFile,
+      symbols: [],
+      type: AnalysisResultTypeEnum.DEFINITELY_USED
+    }));
 
+const exportWildCards = (file: SourceFile) =>
   file
     .getExportDeclarations()
     .filter(decl => decl.getText().includes("*"))
-    .forEach((decl) => {
-      onResult({
-        file: getModuleSourceFile(decl),
-        symbols: [],
-        type: AnalysisResultTypeEnum.DEFINITELY_USED
-      });
-    });
+    .map((decl) => ({
+      file: getModuleSourceFile(decl),
+      symbols: [],
+      type: AnalysisResultTypeEnum.DEFINITELY_USED
+    }));
+
+const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
+  [
+    ...importWildCards(file),
+    ...exportWildCards(file)
+  ].forEach(onResult);
 };
 
 const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {

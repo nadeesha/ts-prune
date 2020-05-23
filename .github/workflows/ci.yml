@@ -23,3 +23,9 @@ jobs:
         uses: borales/actions-yarn@v2.0.0
         with:
           cmd: test:integration
+      - name: Publish to NPM
+        if: github.ref == 'refs/heads/master'
+        uses: mikeal/merge-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

@@ -72,6 +72,17 @@ const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
         type: AnalysisResultTypeEnum.DEFINITELY_USED
       });
     });
+
+  file
+    .getExportDeclarations()
+    .filter(decl => decl.getText().includes("*"))
+    .forEach((decl) => {
+      onResult({
+        file: getModuleSourceFile(decl),
+        symbols: [],
+        type: AnalysisResultTypeEnum.DEFINITELY_USED
+      });
+    });
 };
 
 const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {

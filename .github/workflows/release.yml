@@ -1,2 +1,0 @@
-- name: Publish to npm
-  uses: pascalgn/npm-publish-action@1.2.0

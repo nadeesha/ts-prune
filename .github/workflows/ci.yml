@@ -25,7 +25,9 @@ jobs:
           cmd: test:integration
       - name: Publish to NPM
         if: github.ref == 'refs/heads/master'
-        run: npx semantic-release
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

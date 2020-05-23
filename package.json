@@ -1,9 +1,13 @@
 {
   "name": "ts-prune",
-  "version": "0.3.1",
+  "version": "0.0.0-dev",
   "main": "lib/index.js",
   "author": "Nadeesha Cabral <n@nadeesha.me>",
   "license": "MIT",
+  "engines": {
+    "node": "^12.16.3",
+    "yarn": "^1.22.4"
+  },
   "scripts": {
     "build": "tsc",
     "prepublish": "rm -rf lib && yarn build",
@@ -20,6 +24,7 @@
     "@typescript-eslint/parser": "^2.29.0",
     "eslint": "^6.8.0",
     "jest": "^25.4.0",
+    "semantic-release": "^17.0.7",
     "ts-jest": "^25.4.0",
     "ts-node": "^8.9.0",
     "typescript": "^3.9.3"

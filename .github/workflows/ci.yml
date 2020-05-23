@@ -1,0 +1,27 @@
+name: Run CI Pipeline
+on: [push]
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v1
+      - name: Setup node version
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12"
+      - name: Install dependencies
+        run: yarn install
+      - name: Build typescript
+        run: yarn build
+      - name: Unit tests
+        run: yarn test
+      - name: Integration tests
+        run: yarn test:integration
+      - name: Publish to NPM
+        if: github.ref == 'refs/heads/master'
+        run: yarn semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

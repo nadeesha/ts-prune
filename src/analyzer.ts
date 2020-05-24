@@ -1,10 +1,12 @@
+import { ignoreComment } from "./constants";
 import {
   ExportDeclaration,
   ImportDeclaration,
   Project,
   SourceFile,
   SourceFileReferencingNodes,
-  ts
+  ts,
+  Symbol,
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
@@ -47,14 +49,16 @@ const nodeHandlers = {
   [ts.SyntaxKind.ImportDeclaration.toString()]: handleImportDeclaration
 };
 
+const mustIgnore = (symbol: Symbol, file: SourceFile) => {
+  const symbolLinePos = symbol.getDeclarations().map(decl => decl.getStartLinePos()).reduce((currentMin, current) => Math.min(currentMin, current));
+  const possibleIgnoreLinePos = symbolLinePos - ignoreComment.length;
+  return file.getDescendantAtPos(possibleIgnoreLinePos)?.getText().includes(ignoreComment);
+}
+
 function getExported(file: SourceFile) {
-  const exported: string[] = [];
-
-  file.getExportSymbols().map(symbol => {
-    exported.push(symbol.compilerSymbol.name);
-  });
-
-  return exported;
+  return file.getExportSymbols()
+    .filter(symbol => !mustIgnore(symbol, file))
+    .map(symbol => symbol.compilerSymbol.name);
 }
 
 const importWildCards = (file: SourceFile) =>
@@ -99,6 +103,7 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
         function noop() {
           return [] as string[];
         };
+
       return handler(node);
     });
 

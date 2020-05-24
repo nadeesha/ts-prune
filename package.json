@@ -1,6 +1,6 @@
 {
   "name": "ts-prune",
-  "version": "0.0.0-dev",
+  "version": "0.0.0-development",
   "main": "lib/index.js",
   "author": "Nadeesha Cabral <n@nadeesha.me>",
   "license": "MIT",
@@ -14,7 +14,8 @@
     "pretest": "npm run lint",
     "test": "jest --coverage",
     "test:integration": "sh integration/test.sh",
-    "lint": "eslint . --cache --fix --ext .ts,.tsx"
+    "lint": "eslint . --cache --fix --ext .ts,.tsx",
+    "semantic-release": "semantic-release"
   },
   "devDependencies": {
     "@types/jest": "^25.2.1",
@@ -39,5 +40,10 @@
     "/lib"
   ],
   "bin": "./lib/index.js",
-  "repository": "git@github.com:nadeesha/ts-prune.git"
+  "repository": "git@github.com:nadeesha/ts-prune.git",
+  "release": {
+    "branches": [
+      "master"
+    ]
+  }
 }

@@ -36,7 +36,6 @@ fi
 
 step "Cleanup"
 rm ../../package-lock.json # remnants of the npm link
-rm outfile
 
 echo "🏁"
 exit $EXIT_CODE

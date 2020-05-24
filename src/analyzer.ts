@@ -18,10 +18,13 @@ export enum AnalysisResultTypeEnum {
   DEFINITELY_USED
 }
 
-export interface IAnalysedResult {
+export type IAnalysedResult = {
   file: string;
   type: AnalysisResultTypeEnum;
-  symbols: Array<string>;
+  symbols: Array<{
+    name: string;
+    line?: number
+  }>;
 }
 
 function handleExportDeclaration(node: SourceFileReferencingNodes) {
@@ -55,10 +58,16 @@ const mustIgnore = (symbol: Symbol, file: SourceFile) => {
   return file.getDescendantAtPos(possibleIgnoreLinePos)?.getText().includes(ignoreComment);
 }
 
+const lineNumber = (symbol: Symbol) =>
+  symbol.getDeclarations().map(decl => decl.getStartLineNumber()).reduce((currentMin, current) => Math.min(currentMin, current))
+
 function getExported(file: SourceFile) {
   return file.getExportSymbols()
     .filter(symbol => !mustIgnore(symbol, file))
-    .map(symbol => symbol.compilerSymbol.name);
+    .map(symbol => ({
+      name: symbol.compilerSymbol.name,
+      line: lineNumber(symbol)
+    }));
 }
 
 const importWildCards = (file: SourceFile) =>
@@ -109,7 +118,7 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
 
   const referenced = ([] as string[]).concat(...referenced2D);
 
-  const unused = exported.filter(exp => !referenced.includes(exp));
+  const unused = exported.filter(exp => !referenced.includes(exp.name));
 
   onResult({
     file: file.getFilePath(),

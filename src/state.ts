@@ -16,5 +16,6 @@ export class State {
       result => result.file,
       this.resultsOfType(AnalysisResultTypeEnum.POTENTIALLY_UNUSED),
       this.resultsOfType(AnalysisResultTypeEnum.DEFINITELY_USED)
-    );
+    )
+      .filter(result => result.symbols.length > 0)
 }

@@ -52,8 +52,19 @@ ts-prune | grep -v src/ignore-this-path
 
 #### How do I ignore a specific identifier?
 
+You can either, 
+
+##### 1. Prefix the export with `// ts-prune-ignore-next`
+
+```ts
+// ts-prune-ignore-next
+export const thisNeedsIgnoring = foo;
+```
+
+##### 2. Use `grep -v` to ignore a more widely used export name
+
 ```sh
-ts-prune | grep -v ignoredExport
+ts-prune | grep -v ignoreThisThroughoutMyCodebase
 ```
 
 ### Acknowledgements

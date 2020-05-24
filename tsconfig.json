@@ -7,9 +7,16 @@
     "preserveConstEnums": true,
     "outDir": "lib",
     "sourceMap": true,
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "esModuleInterop": true
   },
-  "include": ["src/index.ts"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "files": [
+    "src/index.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
 }

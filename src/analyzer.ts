@@ -10,6 +10,7 @@ import {
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
+import * as typescript from "typescript";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -84,6 +85,8 @@ const importWildCards = (file: SourceFile) =>
       type: AnalysisResultTypeEnum.DEFINITELY_USED
     }));
 
+
+
 const exportWildCards = (file: SourceFile) =>
   file
     .getExportDeclarations()
@@ -97,7 +100,7 @@ const exportWildCards = (file: SourceFile) =>
 const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
   [
     ...importWildCards(file),
-    ...exportWildCards(file)
+    ...exportWildCards(file),
   ].forEach(onResult);
 };
 
@@ -127,9 +130,18 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
   });
 };
 
-export const analyze = (project: Project, onResult: OnResultType) => {
+const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) =>
+  entrypoints.map(file => ({
+    file,
+    symbols: [],
+    type: AnalysisResultTypeEnum.DEFINITELY_USED,
+  })).forEach(emittable => onResult(emittable))
+
+export const analyze = (project: Project, onResult: OnResultType, entrypoints: string[]) => {
   project.getSourceFiles().forEach(file => {
     emitPotentiallyUnused(file, onResult);
     emitDefinitelyUsed(file, onResult);
   });
+
+  emitTsConfigEntrypoints(entrypoints, onResult);
 };

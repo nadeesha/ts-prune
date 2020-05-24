@@ -1,3 +1,5 @@
+![Build](https://img.shields.io/github/workflow/status/nadeesha/ts-prune/Run%20CI%20Pipeline) ![David](https://img.shields.io/david/nadeesha/ts-prune) ![npm](https://img.shields.io/npm/dm/ts-prune) ![GitHub issues](https://img.shields.io/github/issues-raw/nadeesha/ts-prune)
+
 # ts-prune
 
 Remove unused exports in your Typescript project with zero configuration.

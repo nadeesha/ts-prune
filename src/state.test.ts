@@ -1,6 +1,5 @@
 import { State } from "./state";
 import { AnalysisResultTypeEnum } from "./analyzer";
-import { present } from "./presenter";
 
 describe("State", () => {
   describe("when given state with unused exports", () => {
@@ -9,12 +8,12 @@ describe("State", () => {
     [
       {
         type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
-        symbols: ["foo"],
+        symbols: [{ name: "foo", line: 0 }],
         file: "foo.ts"
       },
       {
         type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
-        symbols: ["bar"],
+        symbols: [{ name: "bar", line: 0 }],
         file: "bar.ts"
       }
     ].forEach(result => state.onResult(result));
@@ -30,12 +29,12 @@ describe("State", () => {
     [
       {
         type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
-        symbols: ["foo"],
+        symbols: [{ name: "foo", line: 0 }],
         file: "foo.ts"
       },
       {
         type: AnalysisResultTypeEnum.DEFINITELY_USED,
-        symbols: ["foo"],
+        symbols: [{ name: "foo", line: 0 }],
         file: "foo.ts"
       }
     ].forEach(result => state.onResult(result));

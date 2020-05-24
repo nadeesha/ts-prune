@@ -9,19 +9,19 @@ describe("present", () => {
     [
       {
         type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
-        symbols: ["foo"],
-        file: "foo.ts"
+        symbols: [{ name: "foo", line: 0 }],
+        file: "foo.ts",
       },
       {
         type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
-        symbols: ["bar"],
-        file: "bar.ts"
-      }
-    ].forEach(result => state.onResult(result));
+        symbols: [{ name: "bar", line: 0 }],
+        file: "bar.ts",
+      },
+    ].forEach((result) => state.onResult(result));
 
     it("should produce a presentable output", () => {
-      expect(JSON.stringify(present(state))).toBe(
-        JSON.stringify(["foo @ foo.ts", "bar @ bar.ts"])
+      expect(JSON.stringify(present(state))).toMatchInlineSnapshot(
+        `"[\\"foo.ts:0 - foo\\",\\"bar.ts:0 - bar\\"]"`
       );
     });
   });
@@ -32,15 +32,15 @@ describe("present", () => {
     [
       {
         type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
-        symbols: ["foo"],
-        file: "foo.ts"
+        symbols: [{ name: "foo", line: 0 }],
+        file: "foo.ts",
       },
       {
         type: AnalysisResultTypeEnum.DEFINITELY_USED,
-        symbols: ["foo"],
-        file: "foo.ts"
-      }
-    ].forEach(result => state.onResult(result));
+        symbols: [{ name: "foo", line: 0 }],
+        file: "foo.ts",
+      },
+    ].forEach((result) => state.onResult(result));
 
     it("should produce an empty output", () => {
       expect(JSON.stringify(present(state))).toBe(JSON.stringify([]));

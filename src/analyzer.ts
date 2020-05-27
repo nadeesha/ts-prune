@@ -54,13 +54,13 @@ const nodeHandlers = {
 };
 
 const mustIgnore = (symbol: Symbol, file: SourceFile) => {
-  const symbolLinePos = symbol.getDeclarations().map(decl => decl.getStartLinePos()).reduce((currentMin, current) => Math.min(currentMin, current));
+  const symbolLinePos = symbol.getDeclarations().map(decl => decl.getStartLinePos()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity);
   const possibleIgnoreLinePos = symbolLinePos - ignoreComment.length;
   return file.getDescendantAtPos(possibleIgnoreLinePos)?.getText().includes(ignoreComment);
 }
 
 const lineNumber = (symbol: Symbol) =>
-  symbol.getDeclarations().map(decl => decl.getStartLineNumber()).reduce((currentMin, current) => Math.min(currentMin, current))
+  symbol.getDeclarations().map(decl => decl.getStartLineNumber()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity)
 
 function getExported(file: SourceFile) {
   return file.getExportSymbols()

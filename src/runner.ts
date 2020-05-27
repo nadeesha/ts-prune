@@ -9,7 +9,7 @@ import { present } from "./presenter";
 export const run = (argv = process.argv.slice(2), output = console.log) => {
   const tsConfigPath = minimist(argv).p || "tsconfig.json";
   const { project } = initialize(path.join(process.cwd(), tsConfigPath));
-  const entrypoints: string[] = require(path.join(process.cwd(), tsConfigPath))?.files?.map((file: string) => path.join(process.cwd(), file));
+  const entrypoints: string[] = require(path.join(process.cwd(), tsConfigPath))?.files?.map((file: string) => path.join(process.cwd(), file)) || [];
 
   const state = new State();
 

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./lib",
+    "outDir": "./lib", // this is a comment because tsconfig.json can have comments
     "declaration": true,
     "target": "es5",
     "module": "commonjs",

@@ -56,6 +56,12 @@ Configuration file example `ts-prunerc`:
 }
 ```
  
+If you want to use ts-prune as a linter that fails when there are unused exports use `--exit-status`:
+
+```sh
+ts-prune --exit-status && echo "no unused exports" || echo "found unused exports!"
+```
+
 
 If you want to automatically remove unused export declarations:
 

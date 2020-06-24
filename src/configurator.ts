@@ -6,6 +6,7 @@ export interface IConfigInterface {
   project?: string;
   ignore?: string;
   fix?: boolean;
+  "exit-status"?: boolean;
 }
 
 const defaultConfig: IConfigInterface = {

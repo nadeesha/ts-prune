@@ -31,4 +31,8 @@ export const run = (config: IConfigInterface, output = console.log) => {
   if (config.fix) {
     fix(state);
   }
+
+  if (config["exit-status"] && presented.length > 0) {
+    process.exit(1)
+  }
 };

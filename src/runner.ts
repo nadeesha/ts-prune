@@ -23,11 +23,11 @@ export const run = (argv = process.argv.slice(2), output = console.log) => {
 
   const presented = present(state);
 
-  if (config.fix) {
-    fix(state);
-  }
-
   presented.forEach(value => {
     output(value);
   });
+
+  if (config.fix) {
+    fix(state);
+  }
 };

@@ -10,6 +10,8 @@ import {
   SyntaxKind,
   StringLiteral,
   ObjectBindingPattern,
+  CallExpression,
+  Node
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";

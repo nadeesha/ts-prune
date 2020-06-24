@@ -5,6 +5,7 @@ import pick from "lodash/fp/pick";
 export interface IConfigInterface {
   project?: string;
   ignore?: string;
+  fix?: boolean;
 }
 
 const defaultConfig: IConfigInterface = {

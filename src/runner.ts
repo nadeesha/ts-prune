@@ -7,6 +7,7 @@ import { initialize } from "./initializer";
 import { State } from "./state";
 import { present } from "./presenter";
 import { IConfigInterface } from "./configurator";
+import { fix } from './fixer';
 
 export const run = (config: IConfigInterface, output = console.log) => {
   const tsConfigPath = config.project;
@@ -26,4 +27,8 @@ export const run = (config: IConfigInterface, output = console.log) => {
   filterIgnored.forEach(value => {
     output(value);
   });
+
+  if (config.fix) {
+    fix(state);
+  }
 };

@@ -16,6 +16,7 @@ import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import { getNodesOfKind } from './util/getNodesOfKind';
 import countBy from "lodash/fp/countBy";
 import last from "lodash/fp/last";
+import * as typescript from "typescript";
 import { realpathSync } from "fs";
 
 type OnResultType = (result: IAnalysedResult) => void;
@@ -210,7 +211,7 @@ export const getPotentiallyUnused = (file: SourceFile): IAnalysedResult => {
       .map(exp => ({ ...exp, usedInModule: referencedInFile.includes(exp.name) }))
 
   return {
-    file: file.getFilePath(),
+    file: realpathSync(file.getFilePath()),
     symbols: unused,
     type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED
   };

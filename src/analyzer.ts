@@ -27,6 +27,7 @@ export type IAnalysedResult = {
   type: AnalysisResultTypeEnum;
   symbols: Array<{
     name: string;
+    symbol: Symbol;
     line?: number
   }>;
 }
@@ -76,6 +77,7 @@ function getExported(file: SourceFile) {
   return file.getExportSymbols()
     .filter(symbol => !mustIgnore(symbol, file))
     .map(symbol => ({
+      symbol,
       name: symbol.compilerSymbol.name,
       line: lineNumber(symbol)
     }));
@@ -143,6 +145,7 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
 const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) =>
   entrypoints.map(file => ({
     file,
+    sourceFileInstance: null,
     symbols: [],
     type: AnalysisResultTypeEnum.DEFINITELY_USED,
   })).forEach(emittable => onResult(emittable))

@@ -9,12 +9,12 @@ describe("present", () => {
     [
       {
         type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
-        symbols: [{ name: "foo", line: 0 }],
+        symbols: [{ name: "foo", line: 0, symbol: null }],
         file: "foo.ts",
       },
       {
         type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
-        symbols: [{ name: "bar", line: 0 }],
+        symbols: [{ name: "bar", line: 0, symbol: null }],
         file: "bar.ts",
       },
     ].forEach((result) => state.onResult(result));
@@ -32,12 +32,12 @@ describe("present", () => {
     [
       {
         type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
-        symbols: [{ name: "foo", line: 0 }],
+        symbols: [{ name: "foo", line: 0, symbol: null }],
         file: "foo.ts",
       },
       {
         type: AnalysisResultTypeEnum.DEFINITELY_USED,
-        symbols: [{ name: "foo", line: 0 }],
+        symbols: [{ name: "foo", line: 0, symbol: null }],
         file: "foo.ts",
       },
     ].forEach((result) => state.onResult(result));

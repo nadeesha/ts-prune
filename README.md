@@ -38,6 +38,15 @@ If you want to run against different Typescript configuration than tsconfig.json
 ts-prune -p tsconfig.dev.json
 ```
 
+
+If you want to automatically remove unused export declarations:
+
+```sh
+ts-prune --fix
+```
+
+This will cause all exported functions, classes and variables to become local declarations, and will remove `export ... from ...` statements.
+
 ### FAQ
 
 #### How do I get the count of unused exports?

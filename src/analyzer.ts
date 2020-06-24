@@ -7,6 +7,8 @@ import {
   SourceFileReferencingNodes,
   ts,
   Symbol,
+  CallExpression,
+  Node
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
@@ -49,9 +51,16 @@ function handleImportDeclaration(node: SourceFileReferencingNodes) {
   return referenced;
 }
 
+// like import("../xyz")
+function handleDynamicImport(node: SourceFileReferencingNodes) {
+  // a dynamic import always imports all elements, so we can't tell if only some are used
+  return ["*"];
+}
+
 const nodeHandlers = {
   [ts.SyntaxKind.ExportDeclaration.toString()]: handleExportDeclaration,
-  [ts.SyntaxKind.ImportDeclaration.toString()]: handleImportDeclaration
+  [ts.SyntaxKind.ImportDeclaration.toString()]: handleImportDeclaration,
+  [ts.SyntaxKind.CallExpression.toString()]: handleDynamicImport,
 };
 
 const mustIgnore = (symbol: Symbol, file: SourceFile) => {
@@ -122,7 +131,7 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
 
   const referenced = ([] as string[]).concat(...referenced2D);
 
-  const unused = exported.filter(exp => !referenced.includes(exp.name));
+  const unused = referenced.includes("*") ? [] : exported.filter(exp => !referenced.includes(exp.name));
 
   onResult({
     file: realpathSync(file.getFilePath()),

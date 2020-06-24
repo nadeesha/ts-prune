@@ -30,4 +30,8 @@ export const run = (argv = process.argv.slice(2), output = console.log) => {
   if (config.fix) {
     fix(state);
   }
+
+  if (config["exit-status"] && presented.length > 0) {
+    process.exit(1)
+  }
 };

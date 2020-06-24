@@ -11,6 +11,7 @@ import {
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import * as typescript from "typescript";
+import { realpathSync } from "fs";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -124,7 +125,7 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
   const unused = exported.filter(exp => !referenced.includes(exp.name));
 
   onResult({
-    file: file.getFilePath(),
+    file: realpathSync(file.getFilePath()),
     symbols: unused,
     type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED
   });

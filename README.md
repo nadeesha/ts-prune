@@ -47,6 +47,12 @@ ts-prune --fix
 
 This will cause all exported functions, classes and variables to become local declarations, and will remove `export ... from ...` statements.
 
+After this step, you should do the following things:
+
+1. Verify your code still compiles
+2. Run `ts-prune --fix` again, since there may be new unused exports after the first run
+3. Find new unused local variable declarations with tsconfig `"noUnusedLocals": true`
+
 ### FAQ
 
 #### How do I get the count of unused exports?

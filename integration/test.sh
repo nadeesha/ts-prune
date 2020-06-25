@@ -7,14 +7,14 @@ step () {
 }
 
 step "Creating npm link to the current working tree"
-npm link
+yarn link
 
 step "Change to testproject dir"
 cd "$(dirname "$0")"
 cd testproject
 
 step "Linking ts-prune from step 1"
-npm link ts-prune
+yarn link ts-prune
 
 step "Run ts-prune"
 ts-prune | tee outfile
@@ -35,7 +35,7 @@ else
 fi
 
 step "Cleanup"
-rm ../../package-lock.json # remnants of the npm link
+# rm ../../package-lock.json # remnants of the npm link
 
 echo "🏁"
 exit $EXIT_CODE

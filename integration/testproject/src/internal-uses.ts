@@ -4,5 +4,8 @@
 // However, it is used in this file, so it's not dead code.
 export const usedInThisFile = {};
 
-// ts-prune-ignore-next
-export const usedInAnotherFile = {...usedInThisFile};
+export const thisOneIsUnused = {...usedInThisFile};
+
+export interface UsedInThisFile {}
+
+export interface Unused extends UsedInThisFile {}

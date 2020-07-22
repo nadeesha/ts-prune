@@ -1,5 +1,5 @@
 {
-  "name": "ts-prune",
+  "name": "ts-vulture",
   "version": "0.0.0-development",
   "main": "lib/index.js",
   "author": "Nadeesha Cabral <n@nadeesha.me>",

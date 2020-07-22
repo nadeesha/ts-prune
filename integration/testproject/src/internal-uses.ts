@@ -9,3 +9,11 @@ export const thisOneIsUnused = {...usedInThisFile};
 export interface UsedInThisFile {}
 
 export interface Unused extends UsedInThisFile {}
+
+export interface Row {
+  [column: string]: number;
+}
+
+export interface UnusedProps {
+  rows: readonly Row[];
+}

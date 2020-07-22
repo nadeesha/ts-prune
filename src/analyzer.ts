@@ -14,7 +14,9 @@ import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import * as typescript from "typescript";
 import { realpathSync } from "fs";
-import uniq from "lodash/fp/uniq";
+import countBy from "lodash/fp/countBy";
+import flatMap from "lodash/fp/flatMap";
+import _ from "lodash";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -118,7 +120,11 @@ const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
 const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
   const exported = getExported(file);
 
-  const identifiersInFile = uniq(file.getDescendantsOfKind(ts.SyntaxKind.Identifier).map(node => node.getText()));
+  const referencedInFile = _(file.getDescendantsOfKind(ts.SyntaxKind.Identifier))
+    .map(node => node.getText())
+    .countBy()
+    .flatMap((count, sym) => count > 1 ? [sym] : [])
+    .value();
 
   const referenced2D = file
     .getReferencingNodesInOtherSourceFiles()
@@ -132,7 +138,7 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
       return handler(node);
     });
 
-  const referenced = ([] as string[]).concat(...referenced2D, identifiersInFile);
+  const referenced = ([] as string[]).concat(...referenced2D, referencedInFile);
 
   const unused = referenced.includes("*") ? [] : exported.filter(exp => !referenced.includes(exp.name));
 

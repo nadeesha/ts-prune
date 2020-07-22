@@ -120,10 +120,13 @@ const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
 const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
   const exported = getExported(file);
 
-  const referencedInFile = _(file.getDescendantsOfKind(ts.SyntaxKind.Identifier))
+  const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
+  const referencedInFile = _(idsInFile)
     .map(node => node.getText())
     .countBy()
-    .flatMap((count, sym) => count > 1 ? [sym] : [])
+    .toPairs()
+    .filter(([name, count]) => count > 1)
+    .map(([name]) => name)
     .value();
 
   const referenced2D = file

@@ -7,16 +7,11 @@ import {
   SourceFileReferencingNodes,
   ts,
   Symbol,
-  CallExpression,
-  Node
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
-import * as typescript from "typescript";
 import { realpathSync } from "fs";
 import countBy from "lodash/fp/countBy";
-import flatMap from "lodash/fp/flatMap";
-import _ from "lodash";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -121,13 +116,8 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
   const exported = getExported(file);
 
   const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
-  const referencedInFile = _(idsInFile)
-    .map(node => node.getText())
-    .countBy()
-    .toPairs()
-    .filter(([name, count]) => count > 1)
-    .map(([name]) => name)
-    .value();
+  const referenceCounts = countBy(x => x)((idsInFile || []).map(node => node.getText()));
+  const referencedInFile = Object.entries(referenceCounts).flatMap(([name, count]) => count > 1 ? [name] : []);
 
   const referenced2D = file
     .getReferencingNodesInOtherSourceFiles()

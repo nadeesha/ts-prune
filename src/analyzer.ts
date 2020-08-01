@@ -20,13 +20,16 @@ export enum AnalysisResultTypeEnum {
   DEFINITELY_USED
 }
 
+export type ResultSymbol = {
+  name: string;
+  line?: number;
+  usedInModule: boolean;
+};
+
 export type IAnalysedResult = {
   file: string;
   type: AnalysisResultTypeEnum;
-  symbols: Array<{
-    name: string;
-    line?: number
-  }>;
+  symbols: ResultSymbol[];
 }
 
 function handleExportDeclaration(node: SourceFileReferencingNodes) {
@@ -94,7 +97,6 @@ const importWildCards = (file: SourceFile) =>
     }));
 
 
-
 const exportWildCards = (file: SourceFile) =>
   file
     .getExportDeclarations()
@@ -131,9 +133,11 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
       return handler(node);
     });
 
-  const referenced = ([] as string[]).concat(...referenced2D, referencedInFile);
+  const referenced = ([] as string[]).concat(...referenced2D);
 
-  const unused = referenced.includes("*") ? [] : exported.filter(exp => !referenced.includes(exp.name));
+  const unused = referenced.includes("*") ? [] :
+    exported.filter(exp => !referenced.includes(exp.name))
+    .map(exp => ({...exp, usedInModule: referencedInFile.includes(exp.name)}))
 
   onResult({
     file: realpathSync(file.getFilePath()),

@@ -16,7 +16,6 @@ import {
 import { containsWildcardImport, isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import countBy from "lodash/fp/countBy";
-import { EALREADY } from "constants";
 
 type OnResultType = (result: IAnalysedResult) => void;
 

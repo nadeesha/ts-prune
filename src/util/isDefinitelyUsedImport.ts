@@ -1,7 +1,7 @@
 import { ImportDeclaration } from "ts-morph";
 import { Maybe } from "true-myth";
 
-const containsWildcardImport = (decl: ImportDeclaration) =>
+export const containsWildcardImport = (decl: ImportDeclaration) =>
   Maybe.of(decl.getImportClause())
     .mapOr("", clause => clause.getText())
     .includes("*");

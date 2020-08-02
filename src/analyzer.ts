@@ -6,11 +6,13 @@ import {
   SourceFile,
   SourceFileReferencingNodes,
   ts,
+  Node,
   Symbol,
+  SyntaxKind,
+  PropertyAccessExpression,
 } from "ts-morph";
-import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
+import { containsWildcardImport, isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
-import { realpathSync } from "fs";
 import countBy from "lodash/fp/countBy";
 
 type OnResultType = (result: IAnalysedResult) => void;
@@ -36,21 +38,54 @@ function handleExportDeclaration(node: SourceFileReferencingNodes) {
   return (node as ExportDeclaration).getNamedExports().map(n => n.getName());
 }
 
-function handleImportDeclaration(node: SourceFileReferencingNodes) {
-  const referenced = [] as string[];
-
-  (node as ImportDeclaration)
-    .getNamedImports()
-    .map(n => referenced.push(n.getName()));
-
-  const defaultImport = (node as ImportDeclaration).getDefaultImport();
-
-  if (defaultImport) {
-    referenced.push("default");
-  }
-
-  return referenced;
+function handleImportDeclaration(node: ImportDeclaration) {
+  return (
+    [
+      ...node.getNamedImports().map(n => n.getName()),
+      ...(node.getDefaultImport() ? ['default'] : [])
+    ]
+  );
 }
+
+export function getNodesOfKind(node: SourceFile, kind: SyntaxKind): Node[] {
+  const out: Node[] = [];
+  node.forEachDescendant(node => {
+    if (node.getKind() === kind) {
+      out.push(node);
+    }
+  });
+  return out;
+}
+
+/**
+ * Given an `import * as foo from './foo'` import, figure out which symbols in foo are used.
+ *
+ * If there are uses which cannot be tracked, this returns ["*"].
+ */
+export const trackWildcardUses = (node: ImportDeclaration) => {
+  const clause = node.getImportClause();
+  clause.getText();  // "* as foo"
+  clause.getFullText();  // " * as foo"
+  clause.getDefaultImport();  // undefined
+
+  const namespaceImport = clause.getFirstChildByKind(ts.SyntaxKind.NamespaceImport);
+  const wildcardName = namespaceImport.getName();  // "foo"
+
+  const source = node.getSourceFile();
+  source.getNodesReferencingOtherSourceFiles();
+
+  const propertyAccesses = getNodesOfKind(source, ts.SyntaxKind.PropertyAccessExpression)
+    .flatMap((n: PropertyAccessExpression) => {
+      const ns = n.getChildAtIndex(0);
+      const decls = ns.getSymbol()?.getDeclarations();
+      if (decls?.includes(namespaceImport)) {
+        return [n.getName()];
+      }
+      return [];
+    });
+
+  return propertyAccesses;
+};
 
 // like import("../xyz")
 function handleDynamicImport(node: SourceFileReferencingNodes) {
@@ -96,7 +131,6 @@ export const importWildCards = (file: SourceFile): IAnalysedResult[] =>
       type: AnalysisResultTypeEnum.DEFINITELY_USED
     }));
 
-
 const exportWildCards = (file: SourceFile): IAnalysedResult[] =>
   file
     .getExportDeclarations()
@@ -119,24 +153,19 @@ export const getPotentiallyUnused = (file: SourceFile): IAnalysedResult => {
   const referenceCounts = countBy(x => x)((idsInFile || []).map(node => node.getText()));
   const referencedInFile = Object.entries(referenceCounts).flatMap(([name, count]) => count > 1 ? [name] : []);
 
-  const referenced2D = file
+  const referenced = file
     .getReferencingNodesInOtherSourceFiles()
-    .map((node: SourceFileReferencingNodes) => {
-      const handler =
-        nodeHandlers[node.getKind().toString()] ||
-        ((): string[] => []);
-
-      return handler(node);
+    .flatMap((node: SourceFileReferencingNodes) => {
+      const kind = node.getKind().toString();
+      return nodeHandlers?.[kind]?.(node) ?? [];
     });
-
-  const referenced = ([] as string[]).concat(...referenced2D);
 
   const unused = referenced.includes("*") ? [] :
     exported.filter(exp => !referenced.includes(exp.name))
     .map(exp => ({...exp, usedInModule: referencedInFile.includes(exp.name)}))
 
   return {
-    file: realpathSync(file.getFilePath()),
+    file: file.getFilePath(),
     symbols: unused,
     type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED
   };

@@ -117,6 +117,12 @@ export const trackWildcardUses = (node: ImportDeclaration) => {
       }
     }
 
+    const qualExp = use.getParentIfKind(SyntaxKind.QualifiedName);
+    if (qualExp) {
+      symbols.push(qualExp.getRight().getText());
+      continue;
+    }
+
     // If we don't understand a use, be conservative.
     return ['*'];
   }

@@ -13,6 +13,7 @@ export const x = 'x';
 export const y = 'y';
 export const z = {a: 'a'};
 export const w = 'w';
+export type ABC = 'a' | 'b' | 'c';
 `;
 
 const starImportSrc = `
@@ -23,6 +24,7 @@ const x = foo.x;
 const {y} = foo;
 const {z: {a}} = foo;
 const w = foo['w'];
+type ABC = foo.ABC;
 
 // TODO(danvk): test these two cases:
 // const all = foo[Math.random()];
@@ -52,6 +54,7 @@ describe("analyzer", () => {
       { name: "y", line: 3 },
       { name: "z", line: 4 },
       { name: "w", line: 5 },
+      { name: "ABC", line: 6 },
     ]);
 
     expect(getExported(useFoo)).toEqual([{ name: "UseFoo", line: 2 }]);
@@ -80,7 +83,7 @@ describe("analyzer", () => {
     const importNode = star.getFirstDescendantByKindOrThrow(ts.SyntaxKind.ImportDeclaration);
 
     expect(trackWildcardUses(importNode)).toEqual(
-      ['x', 'y', 'z', 'w']
+      ['x', 'y', 'z', 'w', 'ABC']
     );
   });
 });

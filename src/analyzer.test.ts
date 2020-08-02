@@ -23,8 +23,9 @@ const x = foo.x;
 const {y} = foo;
 const {z: {a}} = foo;
 const w = foo['w'];
-// const all = foo[Math.random()];
 
+// TODO(danvk): test these two cases:
+// const all = foo[Math.random()];
 // UseFoo(foo);
 `;
 

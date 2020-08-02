@@ -82,7 +82,7 @@ function getExported(file: SourceFile) {
     }));
 }
 
-const importWildCards = (file: SourceFile) =>
+export const importWildCards = (file: SourceFile) =>
   file
     .getImportDeclarations()
     .map(decl => ({

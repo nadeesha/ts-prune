@@ -73,16 +73,16 @@ const mustIgnore = (symbol: Symbol, file: SourceFile) => {
 const lineNumber = (symbol: Symbol) =>
   symbol.getDeclarations().map(decl => decl.getStartLineNumber()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity)
 
-function getExported(file: SourceFile) {
-  return file.getExportSymbols()
+export const getExported = (file: SourceFile) =>
+  file.getExportSymbols()
     .filter(symbol => !mustIgnore(symbol, file))
     .map(symbol => ({
       name: symbol.compilerSymbol.name,
       line: lineNumber(symbol)
     }));
-}
 
-export const importWildCards = (file: SourceFile) =>
+/* Returns all the "import * as x from './y';" imports */
+export const importWildCards = (file: SourceFile): IAnalysedResult[] =>
   file
     .getImportDeclarations()
     .map(decl => ({
@@ -97,7 +97,7 @@ export const importWildCards = (file: SourceFile) =>
     }));
 
 
-const exportWildCards = (file: SourceFile) =>
+const exportWildCards = (file: SourceFile): IAnalysedResult[] =>
   file
     .getExportDeclarations()
     .filter(decl => decl.getText().includes("*"))
@@ -107,14 +107,12 @@ const exportWildCards = (file: SourceFile) =>
       type: AnalysisResultTypeEnum.DEFINITELY_USED
     }));
 
-const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
-  [
+const getDefinitelyUsed = (file: SourceFile): IAnalysedResult[] => ([
     ...importWildCards(file),
     ...exportWildCards(file),
-  ].forEach(onResult);
-};
+  ]);
 
-const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
+export const getPotentiallyUnused = (file: SourceFile): IAnalysedResult => {
   const exported = getExported(file);
 
   const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
@@ -126,9 +124,7 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
     .map((node: SourceFileReferencingNodes) => {
       const handler =
         nodeHandlers[node.getKind().toString()] ||
-        function noop() {
-          return [] as string[];
-        };
+        ((): string[] => []);
 
       return handler(node);
     });
@@ -139,11 +135,11 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
     exported.filter(exp => !referenced.includes(exp.name))
     .map(exp => ({...exp, usedInModule: referencedInFile.includes(exp.name)}))
 
-  onResult({
+  return {
     file: realpathSync(file.getFilePath()),
     symbols: unused,
     type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED
-  });
+  };
 };
 
 const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) =>
@@ -155,8 +151,10 @@ const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) 
 
 export const analyze = (project: Project, onResult: OnResultType, entrypoints: string[]) => {
   project.getSourceFiles().forEach(file => {
-    emitPotentiallyUnused(file, onResult);
-    emitDefinitelyUsed(file, onResult);
+    [
+      getPotentiallyUnused(file),
+      ...getDefinitelyUsed(file),
+    ].forEach(onResult);
   });
 
   emitTsConfigEntrypoints(entrypoints, onResult);

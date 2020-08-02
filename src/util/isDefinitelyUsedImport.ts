@@ -11,4 +11,4 @@ const containsUnnamedImport = (decl: ImportDeclaration) =>
   !decl.getImportClause();
 
 export const isDefinitelyUsedImport = (decl: ImportDeclaration) =>
-  containsWildcardImport(decl) || containsUnnamedImport(decl);
+  containsUnnamedImport(decl);

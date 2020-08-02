@@ -20,9 +20,9 @@ import * as foo from './foo';
 import {UseFoo} from './use-foo';
 
 const x = foo.x;
-// const {y} = foo;
-// const {z: {a}} = foo;
-// const w = foo['w'];
+const {y} = foo;
+const {z: {a}} = foo;
+const w = foo['w'];
 // const all = foo[Math.random()];
 
 // UseFoo(foo);
@@ -41,13 +41,8 @@ describe("analyzer", () => {
   const star = project.createSourceFile("/project/star.ts", starImportSrc);
 
   it("should track import wildcards", () => {
-    expect(importWildCards(star)).toEqual([
-      {
-        file: "/project/foo.ts",
-        symbols: [],
-        type: AnalysisResultTypeEnum.DEFINITELY_USED,
-      },
-    ]);
+    // TODO(danvk): rename this to importSideEffects()
+    expect(importWildCards(star)).toEqual([]);
   });
 
   it("should track named exports", () => {
@@ -65,10 +60,10 @@ describe("analyzer", () => {
     expect(getPotentiallyUnused(foo)).toEqual({
       file: "/project/foo.ts",
       symbols: [
-        { line: 2, name: "x", usedInModule: false },
-        { line: 3, name: "y", usedInModule: false },
-        { line: 4, name: "z", usedInModule: false },
-        { line: 5, name: "w", usedInModule: false },
+        // { line: 2, name: "x", usedInModule: false },
+        // { line: 3, name: "y", usedInModule: false },
+        // { line: 4, name: "z", usedInModule: false },
+        // { line: 5, name: "w", usedInModule: false },
       ],
       type: 0,
     });
@@ -80,11 +75,11 @@ describe("analyzer", () => {
     ])
   });
 
-  it.only("should track usage through star imports", () => {
+  it("should track usage through star imports", () => {
     const importNode = star.getFirstDescendantByKindOrThrow(ts.SyntaxKind.ImportDeclaration);
 
     expect(trackWildcardUses(importNode)).toEqual(
-      ['x']
+      ['x', 'y', 'z', 'w']
     );
   });
 });

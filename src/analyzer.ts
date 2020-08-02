@@ -10,10 +10,13 @@ import {
   Symbol,
   SyntaxKind,
   PropertyAccessExpression,
+  StringLiteral,
+  ObjectBindingPattern,
 } from "ts-morph";
 import { containsWildcardImport, isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import countBy from "lodash/fp/countBy";
+import { EALREADY } from "constants";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -42,7 +45,8 @@ function handleImportDeclaration(node: ImportDeclaration) {
   return (
     [
       ...node.getNamedImports().map(n => n.getName()),
-      ...(node.getDefaultImport() ? ['default'] : [])
+      ...(node.getDefaultImport() ? ['default'] : []),
+      ...(node.getNamespaceImport() ? trackWildcardUses(node) : []),
     ]
   );
 }
@@ -69,22 +73,56 @@ export const trackWildcardUses = (node: ImportDeclaration) => {
   clause.getDefaultImport();  // undefined
 
   const namespaceImport = clause.getFirstChildByKind(ts.SyntaxKind.NamespaceImport);
-  const wildcardName = namespaceImport.getName();  // "foo"
-
   const source = node.getSourceFile();
-  source.getNodesReferencingOtherSourceFiles();
 
-  const propertyAccesses = getNodesOfKind(source, ts.SyntaxKind.PropertyAccessExpression)
-    .flatMap((n: PropertyAccessExpression) => {
-      const ns = n.getChildAtIndex(0);
-      const decls = ns.getSymbol()?.getDeclarations();
-      if (decls?.includes(namespaceImport)) {
-        return [n.getName()];
+  const uses = getNodesOfKind(source, ts.SyntaxKind.Identifier)
+    .filter(n => (n.getSymbol()?.getDeclarations() ?? []).includes(namespaceImport));
+
+  const symbols: string[] = [];
+  for (const use of uses) {
+    if (use.getParentIfKind(SyntaxKind.NamespaceImport)) {
+      continue;
+    }
+
+    const p = use.getParentIfKind(SyntaxKind.PropertyAccessExpression);
+    if (p) {
+      symbols.push(p.getName());
+      continue;
+    }
+
+    const el = use.getParentIfKind(SyntaxKind.ElementAccessExpression);
+    if (el) {
+      const arg = el.getArgumentExpression();
+      if (arg.getKind() === SyntaxKind.StringLiteral) {
+        symbols.push((arg as StringLiteral).getLiteralText());
+        continue;
       }
-      return [];
-    });
+    }
 
-  return propertyAccesses;
+    const varExp = use.getParentIfKind(SyntaxKind.VariableDeclaration);
+    if (varExp) {
+      const nameNode = varExp.getNameNode();
+      if (nameNode.getKind() === SyntaxKind.ObjectBindingPattern) {
+        const binder = (nameNode as ObjectBindingPattern);
+        for (const bindEl of binder.getElements()) {
+          const p = bindEl.getPropertyNameNode();
+          if (p) {
+            // e.g. const {z: {a}} = foo;
+            symbols.push(p.getText());
+          } else {
+            // e.g. const {x} = foo;
+            symbols.push(bindEl.getName());
+          }
+        }
+        continue;
+      }
+    }
+
+    // If we don't understand a use, be conservative.
+    return ['*'];
+  }
+
+  return symbols;
 };
 
 // like import("../xyz")

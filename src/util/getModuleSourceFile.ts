@@ -1,4 +1,4 @@
 import { ImportDeclaration, ExportDeclaration } from "ts-morph";
 
 export const getModuleSourceFile = (decl: ImportDeclaration | ExportDeclaration) =>
-  decl.getModuleSpecifierSourceFile().getFilePath();
+  decl.getModuleSpecifierSourceFile()?.getFilePath() ?? null;

@@ -6,15 +6,14 @@ import {
   SourceFile,
   SourceFileReferencingNodes,
   ts,
-  Node,
   Symbol,
   SyntaxKind,
-  PropertyAccessExpression,
   StringLiteral,
   ObjectBindingPattern,
 } from "ts-morph";
-import { containsWildcardImport, isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
+import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
+import { getNodesOfKind } from './util/getNodesOfKind';
 import countBy from "lodash/fp/countBy";
 
 type OnResultType = (result: IAnalysedResult) => void;
@@ -50,16 +49,6 @@ function handleImportDeclaration(node: ImportDeclaration) {
   );
 }
 
-export function getNodesOfKind(node: SourceFile, kind: SyntaxKind): Node[] {
-  const out: Node[] = [];
-  node.forEachDescendant(node => {
-    if (node.getKind() === kind) {
-      out.push(node);
-    }
-  });
-  return out;
-}
-
 /**
  * Given an `import * as foo from './foo'` import, figure out which symbols in foo are used.
  *
@@ -67,10 +56,6 @@ export function getNodesOfKind(node: SourceFile, kind: SyntaxKind): Node[] {
  */
 export const trackWildcardUses = (node: ImportDeclaration) => {
   const clause = node.getImportClause();
-  clause.getText();  // "* as foo"
-  clause.getFullText();  // " * as foo"
-  clause.getDefaultImport();  // undefined
-
   const namespaceImport = clause.getFirstChildByKind(ts.SyntaxKind.NamespaceImport);
   const source = node.getSourceFile();
 
@@ -80,11 +65,13 @@ export const trackWildcardUses = (node: ImportDeclaration) => {
   const symbols: string[] = [];
   for (const use of uses) {
     if (use.getParentIfKind(SyntaxKind.NamespaceImport)) {
+      // This is the "import * as module" line.
       continue;
     }
 
     const p = use.getParentIfKind(SyntaxKind.PropertyAccessExpression);
     if (p) {
+      // e.g. `module.x`
       symbols.push(p.getName());
       continue;
     }
@@ -93,6 +80,7 @@ export const trackWildcardUses = (node: ImportDeclaration) => {
     if (el) {
       const arg = el.getArgumentExpression();
       if (arg.getKind() === SyntaxKind.StringLiteral) {
+        // e.g. `module['x']`
         symbols.push((arg as StringLiteral).getLiteralText());
         continue;
       }
@@ -106,10 +94,10 @@ export const trackWildcardUses = (node: ImportDeclaration) => {
         for (const bindEl of binder.getElements()) {
           const p = bindEl.getPropertyNameNode();
           if (p) {
-            // e.g. const {z: {a}} = foo;
+            // e.g. const {z: {a}} = module;
             symbols.push(p.getText());
           } else {
-            // e.g. const {x} = foo;
+            // e.g. const {x} = module;
             symbols.push(bindEl.getName());
           }
         }
@@ -119,6 +107,7 @@ export const trackWildcardUses = (node: ImportDeclaration) => {
 
     const qualExp = use.getParentIfKind(SyntaxKind.QualifiedName);
     if (qualExp) {
+      // e.g. type T = module.TypeName;
       symbols.push(qualExp.getRight().getText());
       continue;
     }

@@ -1,11 +1,9 @@
 import { Project, ts } from "ts-morph";
 import {
   getExported,
-  getNodesOfKind,
   getPotentiallyUnused,
   importWildCards,
   trackWildcardUses,
-  AnalysisResultTypeEnum,
 } from "./analyzer";
 
 const fooSrc = `
@@ -14,6 +12,9 @@ export const y = 'y';
 export const z = {a: 'a'};
 export const w = 'w';
 export type ABC = 'a' | 'b' | 'c';
+
+export const unusedC = 'c';
+export type UnusedT = 'T';
 `;
 
 const starImportSrc = `
@@ -25,10 +26,6 @@ const {y} = foo;
 const {z: {a}} = foo;
 const w = foo['w'];
 type ABC = foo.ABC;
-
-// TODO(danvk): test these two cases:
-// const all = foo[Math.random()];
-// UseFoo(foo);
 `;
 
 const useFooSrc = `
@@ -55,6 +52,8 @@ describe("analyzer", () => {
       { name: "z", line: 4 },
       { name: "w", line: 5 },
       { name: "ABC", line: 6 },
+      { name: "unusedC", line: 8 },
+      { name: "UnusedT", line: 9 },
     ]);
 
     expect(getExported(useFoo)).toEqual([{ name: "UseFoo", line: 2 }]);
@@ -64,19 +63,11 @@ describe("analyzer", () => {
     expect(getPotentiallyUnused(foo)).toEqual({
       file: "/project/foo.ts",
       symbols: [
-        // { line: 2, name: "x", usedInModule: false },
-        // { line: 3, name: "y", usedInModule: false },
-        // { line: 4, name: "z", usedInModule: false },
-        // { line: 5, name: "w", usedInModule: false },
+        { line: 8, name: "unusedC", usedInModule: false },
+        { line: 9, name: "UnusedT", usedInModule: false },
       ],
       type: 0,
     });
-  });
-
-  it('should get nodes of a kind', () => {
-    expect(getNodesOfKind(star, ts.SyntaxKind.PropertyAccessExpression).map(n => n.getText())).toEqual([
-      "foo.x",
-    ])
   });
 
   it("should track usage through star imports", () => {

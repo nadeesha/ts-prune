@@ -71,10 +71,10 @@ describe("analyzer", () => {
   });
 
   it("should track usage through star imports", () => {
-    const importNode = star.getFirstDescendantByKindOrThrow(ts.SyntaxKind.ImportDeclaration);
-
-    expect(trackWildcardUses(importNode)).toEqual(
-      ['x', 'y', 'z', 'w', 'ABC']
+    const importNode = star.getFirstDescendantByKindOrThrow(
+      ts.SyntaxKind.ImportDeclaration
     );
+
+    expect(trackWildcardUses(importNode)).toEqual(["x", "y", "z", "w", "ABC"]);
   });
 });

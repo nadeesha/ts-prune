@@ -1,7 +1,5 @@
 import { Project, ts } from "ts-morph";
-import {
-  getNodesOfKind,
-} from "./getNodesOfKind";
+import { getNodesOfKind } from "./getNodesOfKind";
 
 const starImportSrc = `
 import * as foo from './foo';
@@ -22,13 +20,13 @@ type ABC = foo.ABC;
 }
 `;
 
-
-test('should get nodes of a kind', () => {
+test("should get nodes of a kind", () => {
   const project = new Project();
   const star = project.createSourceFile("/project/star.ts", starImportSrc);
 
-  expect(getNodesOfKind(star, ts.SyntaxKind.PropertyAccessExpression).map(n => n.getText())).toEqual([
-    "foo.x",
-    "foo.y",
-  ])
+  expect(
+    getNodesOfKind(star, ts.SyntaxKind.PropertyAccessExpression).map((n) =>
+      n.getText()
+    )
+  ).toEqual(["foo.x", "foo.y"]);
 });

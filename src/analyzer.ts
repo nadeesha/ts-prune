@@ -148,8 +148,8 @@ export const getExported = (file: SourceFile) =>
       line: lineNumber(symbol)
     }));
 
-/* Returns all the "import * as x from './y';" imports */
-export const importWildCards = (file: SourceFile): IAnalysedResult[] =>
+/* Returns all the "import './y';" imports, which must be for side effects */
+export const importsForSideEffects = (file: SourceFile): IAnalysedResult[] =>
   file
     .getImportDeclarations()
     .map(decl => ({
@@ -174,7 +174,7 @@ const exportWildCards = (file: SourceFile): IAnalysedResult[] =>
     }));
 
 const getDefinitelyUsed = (file: SourceFile): IAnalysedResult[] => ([
-    ...importWildCards(file),
+    ...importsForSideEffects(file),
     ...exportWildCards(file),
   ]);
 

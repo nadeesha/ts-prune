@@ -2,7 +2,7 @@ import { Project, ts } from "ts-morph";
 import {
   getExported,
   getPotentiallyUnused,
-  importWildCards,
+  importsForSideEffects,
   trackWildcardUses,
 } from "./analyzer";
 
@@ -42,7 +42,7 @@ describe("analyzer", () => {
 
   it("should track import wildcards", () => {
     // TODO(danvk): rename this to importSideEffects()
-    expect(importWildCards(star)).toEqual([]);
+    expect(importsForSideEffects(star)).toEqual([]);
   });
 
   it("should track named exports", () => {

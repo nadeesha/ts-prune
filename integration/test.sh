@@ -26,7 +26,7 @@ if [ "$DIFF" != "" ]
 then
   echo "The output was not the same as the base"
   echo "---"
-  echo $DIFF
+  diff outfile ../outfile.base
   echo "---"
   EXIT_CODE=1
 else
@@ -36,6 +36,7 @@ fi
 
 step "Cleanup"
 rm ../../package-lock.json # remnants of the npm link
+rm ./integration/testproject/outfile # generated outfile
 
 echo "🏁"
 exit $EXIT_CODE

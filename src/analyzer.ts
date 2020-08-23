@@ -12,6 +12,7 @@ import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import { realpathSync } from "fs";
 import countBy from "lodash/fp/countBy";
+import identity from "lodash/fp/identity";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -117,8 +118,8 @@ const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
 const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
   const exported = getExported(file);
 
-  const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
-  const referenceCounts = countBy(x => x)((idsInFile || []).map(node => node.getText()));
+  const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier) || [];
+  const referenceCounts = countBy(identity, (idsInFile || []).map(node => node.getText()));
   const referencedInFile = Object.entries(referenceCounts).flatMap(([name, count]) => count > 1 ? [name] : []);
 
   const referenced2D = file
@@ -137,7 +138,7 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
 
   const unused = referenced.includes("*") ? [] :
     exported.filter(exp => !referenced.includes(exp.name))
-    .map(exp => ({...exp, usedInModule: referencedInFile.includes(exp.name)}))
+      .map(exp => ({ ...exp, usedInModule: referencedInFile.includes(exp.name) }))
 
   onResult({
     file: realpathSync(file.getFilePath()),

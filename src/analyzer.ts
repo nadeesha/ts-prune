@@ -7,13 +7,11 @@ import {
   SourceFileReferencingNodes,
   ts,
   Symbol,
-  CallExpression,
-  Node
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
-import * as typescript from "typescript";
 import { realpathSync } from "fs";
+import countBy from "lodash/fp/countBy";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -22,13 +20,16 @@ export enum AnalysisResultTypeEnum {
   DEFINITELY_USED
 }
 
+export type ResultSymbol = {
+  name: string;
+  line?: number;
+  usedInModule: boolean;
+};
+
 export type IAnalysedResult = {
   file: string;
   type: AnalysisResultTypeEnum;
-  symbols: Array<{
-    name: string;
-    line?: number
-  }>;
+  symbols: ResultSymbol[];
 }
 
 function handleExportDeclaration(node: SourceFileReferencingNodes) {
@@ -96,7 +97,6 @@ const importWildCards = (file: SourceFile) =>
     }));
 
 
-
 const exportWildCards = (file: SourceFile) =>
   file
     .getExportDeclarations()
@@ -117,6 +117,10 @@ const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
 const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
   const exported = getExported(file);
 
+  const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
+  const referenceCounts = countBy(x => x)((idsInFile || []).map(node => node.getText()));
+  const referencedInFile = Object.entries(referenceCounts).flatMap(([name, count]) => count > 1 ? [name] : []);
+
   const referenced2D = file
     .getReferencingNodesInOtherSourceFiles()
     .map((node: SourceFileReferencingNodes) => {
@@ -131,7 +135,9 @@ const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
 
   const referenced = ([] as string[]).concat(...referenced2D);
 
-  const unused = referenced.includes("*") ? [] : exported.filter(exp => !referenced.includes(exp.name));
+  const unused = referenced.includes("*") ? [] :
+    exported.filter(exp => !referenced.includes(exp.name))
+    .map(exp => ({...exp, usedInModule: referencedInFile.includes(exp.name)}))
 
   onResult({
     file: realpathSync(file.getFilePath()),

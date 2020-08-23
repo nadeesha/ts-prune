@@ -1,5 +1,12 @@
 import { State } from "./state";
-import { IAnalysedResult } from "./analyzer";
+import { ResultSymbol } from "./analyzer";
+
+const USED_IN_MODULE = ' (used in module)';
+
+const formatOutput = (file: string, result: ResultSymbol) => {
+  const {name, line, usedInModule} = result;
+  return `${file}:${line} - ${name}` + (usedInModule ? USED_IN_MODULE : '');
+}
 
 export const present = (state: State): string[] => {
   const unused2D = state
@@ -8,9 +15,9 @@ export const present = (state: State): string[] => {
       file: result.file.replace(process.cwd(), "").replace(new RegExp("^/"), ""),
       symbols: result.symbols
     }))
-    .map(result => {
-      return result.symbols.map(symbol => [[result.file, symbol.line].join(":"), symbol.name].join(" - "));
-    });
+    .map(
+      ({file, symbols}) => symbols.map(sym => formatOutput(file, sym))
+    );
 
   return [].concat.apply([], unused2D);
 };

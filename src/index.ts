@@ -3,11 +3,7 @@ import { cosmiconfigSync }  from "cosmiconfig";
 import program  from "commander";
 
 import { run } from "./runner";
-<<<<<<< HEAD
 import { ConfigInterface } from "./config.interface";
-=======
-import {ConfigInterface} from "./config.interface";
->>>>>>> 84907e2... feat(configuration): added cosmiconfig for file config
 
 const cliConfig = program
     .option('-p, --project [project]', 'TS project configuration file (tsconfig.json)')

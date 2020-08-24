@@ -38,6 +38,15 @@ If you want to run against different Typescript configuration than tsconfig.json
 ts-prune -p tsconfig.dev.json
 ```
 
+### CI usage
+NPM script example with multiple exclusion groups via RegExp:
+```json
+"script-name": "ts-prune | (! grep -v -s -E '(index|selector|graphql|mock)\\.ts|\\.(web|native|ios|android)\\.|(migrations|requirements|dist|deprecated)/')"
+```
+- `(! grep ...)` will return correct exit code for CI usage if ts-prune has no output, which means that there is ___no errors___
+- `-E` grep flag specifies [extended RegExp](https://www.gnu.org/software/grep/manual/grep.html)
+- `-s` grep flag suppresses error messages about nonexistent or unreadable files
+
 ### FAQ
 
 #### How do I get the count of unused exports?

@@ -13,6 +13,7 @@ import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import { realpathSync } from "fs";
 import countBy from "lodash/fp/countBy";
 import identity from "lodash/fp/identity";
+import last from "lodash/fp/last";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -66,18 +67,30 @@ const nodeHandlers = {
 };
 
 const mustIgnore = (symbol: Symbol, file: SourceFile) => {
-  const symbolLinePos = symbol.getDeclarations().map(decl => decl.getStartLinePos()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity);
-  const possibleIgnoreLinePos = symbolLinePos - ignoreComment.length;
-  return file.getDescendantAtPos(possibleIgnoreLinePos)?.getText().includes(ignoreComment);
-}
+  const symbolLinePos = symbol
+    .getDeclarations()
+    .map((decl) => decl.getStartLinePos())
+    .reduce((currentMin, current) => Math.min(currentMin, current), Infinity);
+
+  const comments = file
+    .getDescendantAtPos(symbolLinePos)
+    .getLeadingCommentRanges();
+
+  if (!comments) {
+    return false;
+  }
+
+  return last(comments)?.getText().includes(ignoreComment);
+};
 
 const lineNumber = (symbol: Symbol) =>
   symbol.getDeclarations().map(decl => decl.getStartLineNumber()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity)
 
-function getExported(file: SourceFile) {
-  return file.getExportSymbols()
-    .filter(symbol => !mustIgnore(symbol, file))
-    .map(symbol => ({
+export function getExported(file: SourceFile) {
+  return file
+    .getExportSymbols()
+    .filter((symbol) => !mustIgnore(symbol, file))
+    .map((symbol) => ({
       name: symbol.compilerSymbol.name,
       line: lineNumber(symbol)
     }));

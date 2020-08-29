@@ -15,6 +15,8 @@ import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import { getNodesOfKind } from './util/getNodesOfKind';
 import countBy from "lodash/fp/countBy";
+import identity from "lodash/fp/identity";
+import last from "lodash/fp/last";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -132,10 +134,21 @@ const nodeHandlers = {
 };
 
 const mustIgnore = (symbol: Symbol, file: SourceFile) => {
-  const symbolLinePos = symbol.getDeclarations().map(decl => decl.getStartLinePos()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity);
-  const possibleIgnoreLinePos = symbolLinePos - ignoreComment.length;
-  return file.getDescendantAtPos(possibleIgnoreLinePos)?.getText().includes(ignoreComment);
-}
+  const symbolLinePos = symbol
+    .getDeclarations()
+    .map((decl) => decl.getStartLinePos())
+    .reduce((currentMin, current) => Math.min(currentMin, current), Infinity);
+
+  const comments = file
+    .getDescendantAtPos(symbolLinePos)
+    .getLeadingCommentRanges();
+
+  if (!comments) {
+    return false;
+  }
+
+  return last(comments)?.getText().includes(ignoreComment);
+};
 
 const lineNumber = (symbol: Symbol) =>
   symbol.getDeclarations().map(decl => decl.getStartLineNumber()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity)

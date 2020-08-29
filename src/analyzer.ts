@@ -15,8 +15,8 @@ import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import { getNodesOfKind } from './util/getNodesOfKind';
 import countBy from "lodash/fp/countBy";
-import identity from "lodash/fp/identity";
 import last from "lodash/fp/last";
+import { realpathSync } from "fs";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -228,7 +228,9 @@ export const analyze = (project: Project, onResult: OnResultType, entrypoints: s
     [
       getPotentiallyUnused(file),
       ...getDefinitelyUsed(file),
-    ].forEach(onResult);
+    ].forEach(result => {
+      onResult({...result, file: realpathSync(result.file)})
+    });
   });
 
   emitTsConfigEntrypoints(entrypoints, onResult);

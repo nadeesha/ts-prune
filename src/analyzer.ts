@@ -141,7 +141,7 @@ const mustIgnore = (symbol: Symbol, file: SourceFile) => {
 
   const comments = file
     .getDescendantAtPos(symbolLinePos)
-    .getLeadingCommentRanges();
+    ?.getLeadingCommentRanges();
 
   if (!comments) {
     return false;
@@ -187,9 +187,9 @@ const exportWildCards = (file: SourceFile): IAnalysedResult[] =>
     }));
 
 const getDefinitelyUsed = (file: SourceFile): IAnalysedResult[] => ([
-    ...importsForSideEffects(file),
-    ...exportWildCards(file),
-  ]);
+  ...importsForSideEffects(file),
+  ...exportWildCards(file),
+]);
 
 export const getPotentiallyUnused = (file: SourceFile): IAnalysedResult => {
   const exported = getExported(file);
@@ -207,7 +207,7 @@ export const getPotentiallyUnused = (file: SourceFile): IAnalysedResult => {
 
   const unused = referenced.includes("*") ? [] :
     exported.filter(exp => !referenced.includes(exp.name))
-    .map(exp => ({...exp, usedInModule: referencedInFile.includes(exp.name)}))
+      .map(exp => ({ ...exp, usedInModule: referencedInFile.includes(exp.name) }))
 
   return {
     file: file.getFilePath(),
@@ -229,7 +229,7 @@ export const analyze = (project: Project, onResult: OnResultType, entrypoints: s
       getPotentiallyUnused(file),
       ...getDefinitelyUsed(file),
     ].forEach(result => {
-      onResult({...result, file: realpathSync(result.file)})
+      onResult({ ...result, file: realpathSync(result.file) })
     });
   });
 

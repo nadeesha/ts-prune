@@ -7,13 +7,16 @@ import {
   SourceFileReferencingNodes,
   ts,
   Symbol,
+  SyntaxKind,
+  StringLiteral,
+  ObjectBindingPattern,
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
-import { realpathSync } from "fs";
+import { getNodesOfKind } from './util/getNodesOfKind';
 import countBy from "lodash/fp/countBy";
-import identity from "lodash/fp/identity";
 import last from "lodash/fp/last";
+import { realpathSync } from "fs";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -38,21 +41,85 @@ function handleExportDeclaration(node: SourceFileReferencingNodes) {
   return (node as ExportDeclaration).getNamedExports().map(n => n.getName());
 }
 
-function handleImportDeclaration(node: SourceFileReferencingNodes) {
-  const referenced = [] as string[];
+function handleImportDeclaration(node: ImportDeclaration) {
+  return (
+    [
+      ...node.getNamedImports().map(n => n.getName()),
+      ...(node.getDefaultImport() ? ['default'] : []),
+      ...(node.getNamespaceImport() ? trackWildcardUses(node) : []),
+    ]
+  );
+}
 
-  (node as ImportDeclaration)
-    .getNamedImports()
-    .map(n => referenced.push(n.getName()));
+/**
+ * Given an `import * as foo from './foo'` import, figure out which symbols in foo are used.
+ *
+ * If there are uses which cannot be tracked, this returns ["*"].
+ */
+export const trackWildcardUses = (node: ImportDeclaration) => {
+  const clause = node.getImportClause();
+  const namespaceImport = clause.getFirstChildByKind(ts.SyntaxKind.NamespaceImport);
+  const source = node.getSourceFile();
 
-  const defaultImport = (node as ImportDeclaration).getDefaultImport();
+  const uses = getNodesOfKind(source, ts.SyntaxKind.Identifier)
+    .filter(n => (n.getSymbol()?.getDeclarations() ?? []).includes(namespaceImport));
 
-  if (defaultImport) {
-    referenced.push("default");
+  const symbols: string[] = [];
+  for (const use of uses) {
+    if (use.getParentIfKind(SyntaxKind.NamespaceImport)) {
+      // This is the "import * as module" line.
+      continue;
+    }
+
+    const p = use.getParentIfKind(SyntaxKind.PropertyAccessExpression);
+    if (p) {
+      // e.g. `module.x`
+      symbols.push(p.getName());
+      continue;
+    }
+
+    const el = use.getParentIfKind(SyntaxKind.ElementAccessExpression);
+    if (el) {
+      const arg = el.getArgumentExpression();
+      if (arg.getKind() === SyntaxKind.StringLiteral) {
+        // e.g. `module['x']`
+        symbols.push((arg as StringLiteral).getLiteralText());
+        continue;
+      }
+    }
+
+    const varExp = use.getParentIfKind(SyntaxKind.VariableDeclaration);
+    if (varExp) {
+      const nameNode = varExp.getNameNode();
+      if (nameNode.getKind() === SyntaxKind.ObjectBindingPattern) {
+        const binder = (nameNode as ObjectBindingPattern);
+        for (const bindEl of binder.getElements()) {
+          const p = bindEl.getPropertyNameNode();
+          if (p) {
+            // e.g. const {z: {a}} = module;
+            symbols.push(p.getText());
+          } else {
+            // e.g. const {x} = module;
+            symbols.push(bindEl.getName());
+          }
+        }
+        continue;
+      }
+    }
+
+    const qualExp = use.getParentIfKind(SyntaxKind.QualifiedName);
+    if (qualExp) {
+      // e.g. type T = module.TypeName;
+      symbols.push(qualExp.getRight().getText());
+      continue;
+    }
+
+    // If we don't understand a use, be conservative.
+    return ['*'];
   }
 
-  return referenced;
-}
+  return symbols;
+};
 
 // like import("../xyz")
 function handleDynamicImport(node: SourceFileReferencingNodes) {
@@ -86,17 +153,16 @@ const mustIgnore = (symbol: Symbol, file: SourceFile) => {
 const lineNumber = (symbol: Symbol) =>
   symbol.getDeclarations().map(decl => decl.getStartLineNumber()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity)
 
-export function getExported(file: SourceFile) {
-  return file
-    .getExportSymbols()
-    .filter((symbol) => !mustIgnore(symbol, file))
-    .map((symbol) => ({
+export const getExported = (file: SourceFile) =>
+  file.getExportSymbols()
+    .filter(symbol => !mustIgnore(symbol, file))
+    .map(symbol => ({
       name: symbol.compilerSymbol.name,
       line: lineNumber(symbol)
     }));
-}
 
-const importWildCards = (file: SourceFile) =>
+/* Returns all the "import './y';" imports, which must be for side effects */
+export const importsForSideEffects = (file: SourceFile): IAnalysedResult[] =>
   file
     .getImportDeclarations()
     .map(decl => ({
@@ -110,8 +176,7 @@ const importWildCards = (file: SourceFile) =>
       type: AnalysisResultTypeEnum.DEFINITELY_USED
     }));
 
-
-const exportWildCards = (file: SourceFile) =>
+const exportWildCards = (file: SourceFile): IAnalysedResult[] =>
   file
     .getExportDeclarations()
     .filter(decl => decl.getText().includes("*"))
@@ -121,43 +186,34 @@ const exportWildCards = (file: SourceFile) =>
       type: AnalysisResultTypeEnum.DEFINITELY_USED
     }));
 
-const emitDefinitelyUsed = (file: SourceFile, onResult: OnResultType) => {
-  [
-    ...importWildCards(file),
+const getDefinitelyUsed = (file: SourceFile): IAnalysedResult[] => ([
+    ...importsForSideEffects(file),
     ...exportWildCards(file),
-  ].forEach(onResult);
-};
+  ]);
 
-const emitPotentiallyUnused = (file: SourceFile, onResult: OnResultType) => {
+export const getPotentiallyUnused = (file: SourceFile): IAnalysedResult => {
   const exported = getExported(file);
 
-  const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier) || [];
-  const referenceCounts = countBy(identity, (idsInFile || []).map(node => node.getText()));
+  const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
+  const referenceCounts = countBy(x => x)((idsInFile || []).map(node => node.getText()));
   const referencedInFile = Object.entries(referenceCounts).flatMap(([name, count]) => count > 1 ? [name] : []);
 
-  const referenced2D = file
+  const referenced = file
     .getReferencingNodesInOtherSourceFiles()
-    .map((node: SourceFileReferencingNodes) => {
-      const handler =
-        nodeHandlers[node.getKind().toString()] ||
-        function noop() {
-          return [] as string[];
-        };
-
-      return handler(node);
+    .flatMap((node: SourceFileReferencingNodes) => {
+      const kind = node.getKind().toString();
+      return nodeHandlers?.[kind]?.(node) ?? [];
     });
-
-  const referenced = ([] as string[]).concat(...referenced2D);
 
   const unused = referenced.includes("*") ? [] :
     exported.filter(exp => !referenced.includes(exp.name))
-      .map(exp => ({ ...exp, usedInModule: referencedInFile.includes(exp.name) }))
+    .map(exp => ({...exp, usedInModule: referencedInFile.includes(exp.name)}))
 
-  onResult({
-    file: realpathSync(file.getFilePath()),
+  return {
+    file: file.getFilePath(),
     symbols: unused,
     type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED
-  });
+  };
 };
 
 const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) =>
@@ -169,8 +225,12 @@ const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) 
 
 export const analyze = (project: Project, onResult: OnResultType, entrypoints: string[]) => {
   project.getSourceFiles().forEach(file => {
-    emitPotentiallyUnused(file, onResult);
-    emitDefinitelyUsed(file, onResult);
+    [
+      getPotentiallyUnused(file),
+      ...getDefinitelyUsed(file),
+    ].forEach(result => {
+      onResult({...result, file: realpathSync(result.file)})
+    });
   });
 
   emitTsConfigEntrypoints(entrypoints, onResult);

@@ -1,47 +1,80 @@
-import { Project } from "ts-morph";
-import { getExported } from "./analyzer";
+import { Project, ts } from "ts-morph";
+import {
+  getExported,
+  getPotentiallyUnused,
+  importsForSideEffects,
+  trackWildcardUses,
+} from "./analyzer";
 
-const setup = (content: string): ReturnType<typeof getExported> => {
+const fooSrc = `
+export const x = 'x';
+export const y = 'y';
+export const z = {a: 'a'};
+export const w = 'w';
+export type ABC = 'a' | 'b' | 'c';
+
+export const unusedC = 'c';
+export type UnusedT = 'T';
+`;
+
+const starImportSrc = `
+import * as foo from './foo';
+import {UseFoo} from './use-foo';
+
+const x = foo.x;
+const {y} = foo;
+const {z: {a}} = foo;
+const w = foo['w'];
+type ABC = foo.ABC;
+`;
+
+const useFooSrc = `
+export function UseFoo(foo: string) {
+  alert(foo);
+}
+`;
+
+describe("analyzer", () => {
   const project = new Project();
-  // this won't be created on disk: https://github.com/dsherret/ts-morph/issues/649#issuecomment-503766160
-  const file = project.createSourceFile("tempfile.ts", content);
-  return getExported(file);
-};
+  const foo = project.createSourceFile("/project/foo.ts", fooSrc);
+  const useFoo = project.createSourceFile("/project/use-foo.ts", useFooSrc);
+  const star = project.createSourceFile("/project/star.ts", starImportSrc);
 
-test("no leading comment", () => {
-  expect(
-    setup(`
-    export const foo = 2
-    `)
-  ).toHaveLength(1);
-});
+  it("should track import wildcards", () => {
+    // TODO(danvk): rename this to importSideEffects()
+    expect(importsForSideEffects(star)).toEqual([]);
+  });
 
-test("just leading ignore-comment", () => {
-  expect(
-    setup(`
-    //ts-prune-ignore-next
-    export const foo = 2
-    `)
-  ).toHaveLength(0);
-});
+  it("should track named exports", () => {
+    expect(getExported(foo)).toEqual([
+      { name: "x", line: 2 },
+      { name: "y", line: 3 },
+      { name: "z", line: 4 },
+      { name: "w", line: 5 },
+      { name: "ABC", line: 6 },
+      { name: "unusedC", line: 8 },
+      { name: "UnusedT", line: 9 },
+    ]);
 
-test("leading ignore-comment with compact JSDoc first", () => {
-  expect(
-    setup(`
-    /** Foo is foo */
-    //ts-prune-ignore-next
-    export const foo = 2
-    `)
-  ).toHaveLength(0);
-});
-test("leading ignore-comment with full-length JSDoc first", () => {
-  expect(
-    setup(`
-    /** 
-     * Foo is foo 
-     */
-    //ts-prune-ignore-next
-    export const foo = 2
-    `)
-  ).toHaveLength(0);
+    expect(getExported(useFoo)).toEqual([{ name: "UseFoo", line: 2 }]);
+  });
+
+  it("should track named imports", () => {
+    expect(getPotentiallyUnused(foo)).toEqual({
+      file: "/project/foo.ts",
+      symbols: [
+        { line: 8, name: "unusedC", usedInModule: false },
+        { line: 9, name: "UnusedT", usedInModule: false },
+      ],
+      type: 0,
+    });
+  });
+
+  it("should track usage through star imports", () => {
+    const importNode = star.getFirstDescendantByKindOrThrow(
+      ts.SyntaxKind.ImportDeclaration
+    );
+
+    expect(trackWildcardUses(importNode)).toEqual(["x", "y", "z", "w", "ABC"]);
+  });
 });

@@ -12,3 +12,4 @@ src/internal-uses.ts:13 - Row (used in module)
 src/internal-uses.ts:17 - UnusedProps
 src/dynamic/fail.ts:1 - foo
 src/dynamic/fail.ts:3 - bar
+src/wildcard/foo.ts:5 - vUnused

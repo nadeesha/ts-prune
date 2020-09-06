@@ -33,7 +33,7 @@
     "lodash": "^4.17.19",
     "minimist": "^1.2.5",
     "true-myth": "^4.0.0",
-    "ts-morph": "^7.1.2"
+    "ts-morph": "^7.3.0"
   },
   "files": [
     "/lib"

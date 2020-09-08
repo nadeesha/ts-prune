@@ -6,7 +6,8 @@ import { run } from "./runner";
 import { ConfigInterface } from "./config.interface";
 
 const cliConfig = program
-    .option('-p, --project [project]', 'TS project configuration file (tsconfig.json)')
+    .option('-p, --project [project]', 'TS project configuration file (tsconfig.json)', 'tsconfig.json')
+    .option('-i, --ignore [regexp]', 'Path ignore RegExp pattern')
     .parse(process.argv)
 
 const moduleName = 'ts-prune';
@@ -14,8 +15,8 @@ const explorerSync = cosmiconfigSync(moduleName);
 const fileConfig = explorerSync.search();
 
 const config: ConfigInterface = {
-    project: 'tsconfig.json',
-    ...cliConfig.project ? cliConfig : fileConfig
+    ...fileConfig.config,
+    ...cliConfig
 };
 
 run(config);

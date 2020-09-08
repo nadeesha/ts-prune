@@ -21,7 +21,9 @@ export const run = (config: ConfigInterface, output = console.log) => {
 
   const presented = present(state);
 
-  presented.forEach(value => {
+  const filterIgnored = config.ignore !== undefined ? presented.filter(file => !file.match(config.ignore)) : presented;
+
+  filterIgnored.forEach(value => {
     output(value);
   });
 };

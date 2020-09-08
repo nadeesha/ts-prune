@@ -38,15 +38,24 @@ If you want to run against different Typescript configuration than tsconfig.json
 ts-prune -p tsconfig.dev.json
 ```
 
-### CI usage
-NPM script example with multiple exclusion groups via RegExp:
-```json
-"script-name": "ts-prune | (! grep -v -s -E '(index|selector|graphql|mock)\\.ts|\\.(web|native|ios|android)\\.|(migrations|requirements|dist|deprecated)/')"
-```
-- `(! grep ...)` will return correct exit code for CI usage if ts-prune has no output, which means that there are ___no errors___
-- `-E` grep flag specifies [extended RegExp](https://www.gnu.org/software/grep/manual/grep.html)
-- `-s` grep flag suppresses error messages about nonexistent or unreadable files
+### Configuration
+ts-prune supports CLI and file configuration via [comsiconfig](https://github.com/davidtheclark/cosmiconfig#usage) (all file formats are supported).
 
+#### Configuration options
+- `-p, --project` - __tsconfig.json__ path(`tsconfig.json` by default)
+- `-i, --ignore` - errors ignore RegExp pattern
+
+CLI configuration options:
+```bash 
+ts-prune -p my-tsconfig.json -i my-component-ignore-patterns?
+```
+Configuration file example `ts-prunerc`: 
+```json
+{
+  "ignore": "my-component-ignore-patterns?"
+}
+```
+ 
 ### FAQ
 
 #### How do I get the count of unused exports?

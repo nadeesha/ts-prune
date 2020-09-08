@@ -1,3 +1,4 @@
 export interface ConfigInterface {
-    project: string;
+    project?: string;
+    ignore?: string;
 }

@@ -1,5 +1,9 @@
-name: Run CI Pipeline
-on: [push]
+name: Test and Publish
+
+on:
+  push:
+  pull_request:
+
 jobs:
   test:
     name: test

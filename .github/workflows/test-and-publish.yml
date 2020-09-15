@@ -2,7 +2,8 @@ name: Test and Publish
 
 on:
   push:
-  pull_request:
+    branches:
+      - master
 
 jobs:
   test:

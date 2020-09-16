@@ -1,0 +1,15 @@
+src/B.ts:9 - UnusedFooType
+src/C.ts:9 - default
+src/cities.ts:1 - sepehub
+src/cities.ts:2 - kuariob
+src/cities.ts:4 - femvacsah
+src/cities.ts:5 - sijelup
+src/internal-uses.ts:5 - usedInThisFile (used in module)
+src/internal-uses.ts:7 - thisOneIsUnused
+src/internal-uses.ts:9 - UsedInThisFile (used in module)
+src/internal-uses.ts:11 - Unused
+src/internal-uses.ts:13 - Row (used in module)
+src/internal-uses.ts:17 - UnusedProps
+src/dynamic/fail.ts:1 - foo
+src/dynamic/fail.ts:3 - bar
+src/wildcard/foo.ts:5 - vUnused

@@ -38,6 +38,24 @@ If you want to run against different Typescript configuration than tsconfig.json
 ts-prune -p tsconfig.dev.json
 ```
 
+### Configuration
+ts-prune supports CLI and file configuration via [comsiconfig](https://github.com/davidtheclark/cosmiconfig#usage) (all file formats are supported).
+
+#### Configuration options
+- `-p, --project` - __tsconfig.json__ path(`tsconfig.json` by default)
+- `-i, --ignore` - errors ignore RegExp pattern
+
+CLI configuration options:
+```bash 
+ts-prune -p my-tsconfig.json -i my-component-ignore-patterns?
+```
+Configuration file example `ts-prunerc`: 
+```json
+{
+  "ignore": "my-component-ignore-patterns?"
+}
+```
+ 
 ### FAQ
 
 #### How do I get the count of unused exports?

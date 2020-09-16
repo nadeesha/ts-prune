@@ -1,4 +1,3 @@
-import minimist from "minimist";
 import path from "path";
 import JSON5 from "json5";
 import fs from "fs";
@@ -7,9 +6,10 @@ import { analyze } from "./analyzer";
 import { initialize } from "./initializer";
 import { State } from "./state";
 import { present } from "./presenter";
+import {ConfigInterface} from "./config.interface";
 
-export const run = (argv = process.argv.slice(2), output = console.log) => {
-  const tsConfigPath = minimist(argv).p || "tsconfig.json";
+export const run = (config: ConfigInterface, output = console.log) => {
+  const tsConfigPath = config.project;
   const { project } = initialize(path.join(process.cwd(), tsConfigPath));
   const tsConfigJSON = JSON5.parse(fs.readFileSync(path.join(process.cwd(), tsConfigPath), "utf-8"));
 
@@ -21,7 +21,9 @@ export const run = (argv = process.argv.slice(2), output = console.log) => {
 
   const presented = present(state);
 
-  presented.forEach(value => {
+  const filterIgnored = config.ignore !== undefined ? presented.filter(file => !file.match(config.ignore)) : presented;
+
+  filterIgnored.forEach(value => {
     output(value);
   });
 };

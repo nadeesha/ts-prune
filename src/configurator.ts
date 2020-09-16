@@ -17,6 +17,7 @@ const onlyKnownConfigOptions = pick(Object.keys(defaultConfig));
 
 export const getConfig = () => {
   const cliConfig = onlyKnownConfigOptions(program
+    .allowUnknownOption() // required for tests passing in unknown options (ex: https://github.com/nadeesha/ts-prune/runs/1125728070)
     .option('-p, --project [project]', 'TS project configuration file (tsconfig.json)', 'tsconfig.json')
     .option('-i, --ignore [regexp]', 'Path ignore RegExp pattern')
     .parse(process.argv))

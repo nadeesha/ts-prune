@@ -6,9 +6,9 @@ import { analyze } from "./analyzer";
 import { initialize } from "./initializer";
 import { State } from "./state";
 import { present } from "./presenter";
-import {ConfigInterface} from "./config.interface";
+import { IConfigInterface } from "./configurator";
 
-export const run = (config: ConfigInterface, output = console.log) => {
+export const run = (config: IConfigInterface, output = console.log) => {
   const tsConfigPath = config.project;
   const { project } = initialize(path.join(process.cwd(), tsConfigPath));
   const tsConfigJSON = JSON5.parse(fs.readFileSync(path.join(process.cwd(), tsConfigPath), "utf-8"));

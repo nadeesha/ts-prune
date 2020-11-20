@@ -29,6 +29,7 @@ export const run = (config: IConfigInterface, output = console.log) => {
   });
 
   if (config.fix) {
+    console.log("fixing...");
     fix(state);
   }
 

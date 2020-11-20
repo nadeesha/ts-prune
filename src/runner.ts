@@ -7,12 +7,16 @@ import { initialize } from "./initializer";
 import { State } from "./state";
 import { present } from "./presenter";
 import { IConfigInterface } from "./configurator";
-import { fix } from './fixer';
+import { fix, verifyClean } from './fixer';
 
 export const run = (config: IConfigInterface, output = console.log) => {
-  const tsConfigPath = config.project;
-  const { project } = initialize(path.join(process.cwd(), tsConfigPath));
-  const tsConfigJSON = JSON5.parse(fs.readFileSync(path.join(process.cwd(), tsConfigPath), "utf-8"));
+  const tsConfigPath = path.resolve(process.cwd(), config.project);
+
+  const { project } = initialize(tsConfigPath);
+
+  if (config.fix) verifyClean(tsConfigPath);
+  
+  const tsConfigJSON = JSON5.parse(fs.readFileSync(tsConfigPath, "utf-8"));
 
   const entrypoints: string[] = tsConfigJSON?.files?.map((file: string) => path.join(process.cwd(), file)) || [];
 
@@ -33,7 +37,7 @@ export const run = (config: IConfigInterface, output = console.log) => {
     fix(state);
   }
 
-  if (config["exit-status"] && presented.length > 0) {
+  if (config.exitStatus && presented.length > 0) {
     process.exit(1)
   }
 };

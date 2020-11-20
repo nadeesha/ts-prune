@@ -2,7 +2,16 @@ import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import { State } from "./state";
 import { IAnalysedResult } from "./analyzer";
 import { Node, SourceFile } from "ts-morph";
+import { spawnSync } from "child_process";
+import { dirname } from "path";
 
+export const verifyClean = (tsProjectPath: string) => {
+  const project = dirname(tsProjectPath);
+  const proc = spawnSync("git", ["status", "--short", "--porcelain"], {cwd: project, encoding: "utf8"});
+  if (proc.status !== 0 || proc.stdout.length > 0) {
+    throw Error(`${project} seems to be dirty, please commit or stash all changes before running fix mode:\n${proc.stderr}${proc.stdout}`)
+  }
+}
 export const fix = (state: State): void => {
   state.definitelyUnused().forEach((val) => {
     val.symbols.forEach(({ symbol, name }) => {

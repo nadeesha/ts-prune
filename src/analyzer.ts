@@ -9,16 +9,13 @@ import {
   Symbol,
   SyntaxKind,
   StringLiteral,
-  ObjectBindingPattern,
-  CallExpression,
-  Node
+  ObjectBindingPattern
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
 import { getNodesOfKind } from './util/getNodesOfKind';
 import countBy from "lodash/fp/countBy";
 import last from "lodash/fp/last";
-import * as typescript from "typescript";
 import { realpathSync } from "fs";
 
 type OnResultType = (result: IAnalysedResult) => void;

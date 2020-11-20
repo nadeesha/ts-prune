@@ -44,6 +44,8 @@ ts-prune supports CLI and file configuration via [comsiconfig](https://github.co
 #### Configuration options
 - `-p, --project` - __tsconfig.json__ path(`tsconfig.json` by default)
 - `-i, --ignore` - errors ignore RegExp pattern
+-  `--exit-status` - Set exit status to 1 if unused exports were found (for CI)
+-  `--fix` - Fix unused exports by making them unexported
 
 CLI configuration options:
 ```bash 
@@ -62,6 +64,7 @@ If you want to use ts-prune as a linter that fails when there are unused exports
 ts-prune --exit-status && echo "no unused exports" || echo "found unused exports!"
 ```
 
+#### Fix mode
 
 If you want to automatically remove unused export declarations:
 

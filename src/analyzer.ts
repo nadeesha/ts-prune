@@ -229,6 +229,7 @@ export const analyze = (project: Project, onResult: OnResultType, entrypoints: s
       getPotentiallyUnused(file),
       ...getDefinitelyUsed(file),
     ].forEach(result => {
+      if (!result.file) return // Prevent passing along a "null" filepath. Fixes #105
       onResult({ ...result, file: realpathSync(result.file) })
     });
   });

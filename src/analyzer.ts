@@ -198,14 +198,23 @@ export const getPotentiallyUnused = (file: SourceFile): IAnalysedResult => {
 
   const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
   const referenceCounts = countBy(x => x)((idsInFile || []).map(node => node.getText()));
-  const referencedInFile = Object.entries(referenceCounts).flatMap(([name, count]) => count > 1 ? [name] : []);
+  const referencedInFile = Object.entries(referenceCounts)
+    .reduce(
+      (previous, [name, count]) => previous.concat(count > 1 ? [name] : []), 
+      []
+    );
 
   const referenced = file
     .getReferencingNodesInOtherSourceFiles()
-    .flatMap((node: SourceFileReferencingNodes) => {
-      const kind = node.getKind().toString();
-      return nodeHandlers?.[kind]?.(node) ?? [];
-    });
+    .reduce(
+      (previous, node: SourceFileReferencingNodes) => {
+        const kind = node.getKind().toString();
+        const value = nodeHandlers?.[kind]?.(node) ?? [];
+        
+        return previous.concat(value);
+      }, 
+      []
+    );
 
   const unused = referenced.includes("*") ? [] :
     exported.filter(exp => !referenced.includes(exp.name))
@@ -232,6 +241,7 @@ export const analyze = (project: Project, onResult: OnResultType, entrypoints: s
       getPotentiallyUnused(file),
       ...getDefinitelyUsed(file),
     ].forEach(result => {
+      if (!result.file) return // Prevent passing along a "null" filepath. Fixes #105
       onResult({ ...result, file: realpathSync(result.file) })
     });
   });

@@ -39,7 +39,7 @@ ts-prune -p tsconfig.dev.json
 ```
 
 ### Configuration
-ts-prune supports CLI and file configuration via [comsiconfig](https://github.com/davidtheclark/cosmiconfig#usage) (all file formats are supported).
+ts-prune supports CLI and file configuration via [cosmiconfig](https://github.com/davidtheclark/cosmiconfig#usage) (all file formats are supported).
 
 #### Configuration options
 - `-p, --project` - __tsconfig.json__ path(`tsconfig.json` by default)

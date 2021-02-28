@@ -34,6 +34,18 @@ else
   EXIT_CODE=0
 fi
 
+step "Test exit code with no error flag"
+if ! ts-prune > /dev/null; then
+  echo "ts-prune with no error flag returned error"
+  EXIT_CODE=1
+fi
+
+step "Test exit code with error flag"
+if ts-prune -e > /dev/null; then
+  echo "ts-prune with error flag did not return error"
+  EXIT_CODE=1
+fi
+
 step "Cleanup"
 rm ../../package-lock.json # remnants of the npm link
 rm ./integration/testproject/outfile # generated outfile

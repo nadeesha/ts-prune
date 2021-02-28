@@ -3,4 +3,8 @@
 import { getConfig } from "./configurator";
 import { run } from "./runner";
 
-run(getConfig());
+const config = getConfig();
+const resultCount = run(config);
+if (resultCount && config.error){
+    process.exit(1);
+}

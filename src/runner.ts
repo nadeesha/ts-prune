@@ -26,4 +26,5 @@ export const run = (config: IConfigInterface, output = console.log) => {
   filterIgnored.forEach(value => {
     output(value);
   });
+  return filterIgnored.length;
 };

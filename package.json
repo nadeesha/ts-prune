@@ -45,5 +45,6 @@
     "branches": [
       "master"
     ]
-  }
+  },
+  "types": "lib/index.d.ts"
 }

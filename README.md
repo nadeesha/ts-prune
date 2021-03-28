@@ -44,6 +44,7 @@ ts-prune supports CLI and file configuration via [cosmiconfig](https://github.co
 #### Configuration options
 - `-p, --project` - __tsconfig.json__ path(`tsconfig.json` by default)
 - `-i, --ignore` - errors ignore RegExp pattern
+- `-e, --error` - return error code if unused exports are found
 
 CLI configuration options:
 ```bash 

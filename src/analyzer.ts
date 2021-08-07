@@ -17,6 +17,7 @@ import { getNodesOfKind } from './util/getNodesOfKind';
 import countBy from "lodash/fp/countBy";
 import last from "lodash/fp/last";
 import { realpathSync } from "fs";
+import { IConfigInterface } from "./configurator";
 
 type OnResultType = (result: IAnalysedResult) => void;
 
@@ -191,26 +192,33 @@ const getDefinitelyUsed = (file: SourceFile): IAnalysedResult[] => ([
   ...exportWildCards(file),
 ]);
 
-export const getPotentiallyUnused = (file: SourceFile): IAnalysedResult => {
+export const getPotentiallyUnused = (file: SourceFile, skipPattern?: string): IAnalysedResult => {
   const exported = getExported(file);
 
   const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
   const referenceCounts = countBy(x => x)((idsInFile || []).map(node => node.getText()));
   const referencedInFile = Object.entries(referenceCounts)
     .reduce(
-      (previous, [name, count]) => previous.concat(count > 1 ? [name] : []), 
+      (previous, [name, count]) => previous.concat(count > 1 ? [name] : []),
       []
     );
 
-  const referenced = file
-    .getReferencingNodesInOtherSourceFiles()
-    .reduce(
+  let references = file.getReferencingNodesInOtherSourceFiles();
+
+  if(skipPattern){
+    const regExp = new RegExp(skipPattern);
+    references = references.filter(file =>
+      !regExp.test(file.getSourceFile().compilerNode.fileName)
+    );
+  }
+
+  const referenced = references.reduce(
       (previous, node: SourceFileReferencingNodes) => {
         const kind = node.getKind().toString();
         const value = nodeHandlers?.[kind]?.(node) ?? [];
-        
+
         return previous.concat(value);
-      }, 
+      },
       []
     );
 
@@ -232,10 +240,10 @@ const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) 
     type: AnalysisResultTypeEnum.DEFINITELY_USED,
   })).forEach(emittable => onResult(emittable))
 
-export const analyze = (project: Project, onResult: OnResultType, entrypoints: string[]) => {
+export const analyze = (config: IConfigInterface, project: Project, onResult: OnResultType, entrypoints: string[]) => {
   project.getSourceFiles().forEach(file => {
     [
-      getPotentiallyUnused(file),
+      getPotentiallyUnused(file, config.skip),
       ...getDefinitelyUsed(file),
     ].forEach(result => {
       if (!result.file) return // Prevent passing along a "null" filepath. Fixes #105

@@ -34,11 +34,27 @@ export function UseFoo(foo: string) {
 }
 `;
 
+const barSrc = `
+export const bar = () => false;
+`;
+
+const testBarSrc = `
+import { bar } from './bar';
+
+describe("bar", () => {
+  it("should return false", () => {
+    expect(bar()).toBe.toBeFalsy;
+  });
+});
+`;
+
 describe("analyzer", () => {
   const project = new Project();
   const foo = project.createSourceFile("/project/foo.ts", fooSrc);
   const useFoo = project.createSourceFile("/project/use-foo.ts", useFooSrc);
   const star = project.createSourceFile("/project/star.ts", starImportSrc);
+  const bar = project.createSourceFile("/project/bar.ts", barSrc);
+  const testBar = project.createSourceFile("/project/bar.test.ts", testBarSrc);
 
   it("should track import wildcards", () => {
     // TODO(danvk): rename this to importSideEffects()
@@ -65,6 +81,26 @@ describe("analyzer", () => {
       symbols: [
         { line: 8, name: "unusedC", usedInModule: false },
         { line: 9, name: "UnusedT", usedInModule: false },
+      ],
+      type: 0,
+    });
+  });
+
+  it("should not skip source files without a pattern", () => {
+    // while bar.test.ts is included, bar is used
+    expect(getPotentiallyUnused(bar)).toEqual({
+      file: "/project/bar.ts",
+      symbols: [],
+      type: 0,
+    });
+  });
+
+  it("should skip source files matching a pattern", () => {
+    // when bar.test.ts is exclude by the skip pattern, bar is unused
+    expect(getPotentiallyUnused(bar, ".test.ts")).toEqual({
+      file: "/project/bar.ts",
+      symbols: [
+        { line: 2, name: "bar", usedInModule: false },
       ],
       type: 0,
     });

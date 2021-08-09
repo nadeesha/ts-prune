@@ -17,7 +17,7 @@ step "Linking ts-prune from step 1"
 npm link ts-prune
 
 step "Run ts-prune"
-ts-prune | tee outfile
+ts-prune --skip ".test.ts" | tee outfile
 
 step "Diff between outputs"
 DIFF=$(diff outfile ../outfile.base)

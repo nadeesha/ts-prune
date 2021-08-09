@@ -192,6 +192,18 @@ const getDefinitelyUsed = (file: SourceFile): IAnalysedResult[] => ([
   ...exportWildCards(file),
 ]);
 
+const getReferences = (
+  originalList: SourceFileReferencingNodes[],
+  skipPattern?: string
+): SourceFileReferencingNodes[] =>  {
+  if(skipPattern){
+    const regExp = new RegExp(skipPattern);
+    return originalList.filter(file =>
+      !regExp.test(file.getSourceFile().compilerNode.fileName)
+    );
+  }
+  return originalList;
+}
 export const getPotentiallyUnused = (file: SourceFile, skipPattern?: string): IAnalysedResult => {
   const exported = getExported(file);
 
@@ -203,16 +215,10 @@ export const getPotentiallyUnused = (file: SourceFile, skipPattern?: string): IA
       []
     );
 
-  let references = file.getReferencingNodesInOtherSourceFiles();
-
-  if(skipPattern){
-    const regExp = new RegExp(skipPattern);
-    references = references.filter(file =>
-      !regExp.test(file.getSourceFile().compilerNode.fileName)
-    );
-  }
-
-  const referenced = references.reduce(
+  const referenced = getReferences(
+    file.getReferencingNodesInOtherSourceFiles(),
+    skipPattern
+  ).reduce(
       (previous, node: SourceFileReferencingNodes) => {
         const kind = node.getKind().toString();
         const value = nodeHandlers?.[kind]?.(node) ?? [];
@@ -240,10 +246,10 @@ const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) 
     type: AnalysisResultTypeEnum.DEFINITELY_USED,
   })).forEach(emittable => onResult(emittable))
 
-export const analyze = (config: IConfigInterface, project: Project, onResult: OnResultType, entrypoints: string[]) => {
+export const analyze = (project: Project, onResult: OnResultType, entrypoints: string[], skipPattern?: string) => {
   project.getSourceFiles().forEach(file => {
     [
-      getPotentiallyUnused(file, config.skip),
+      getPotentiallyUnused(file, skipPattern),
       ...getDefinitelyUsed(file),
     ].forEach(result => {
       if (!result.file) return // Prevent passing along a "null" filepath. Fixes #105

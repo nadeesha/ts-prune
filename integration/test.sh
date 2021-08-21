@@ -48,7 +48,7 @@ fi
 
 step "Cleanup"
 rm ../../package-lock.json # remnants of the npm link
-rm ./integration/testproject/outfile # generated outfile
+rm outfile # generated outfile
 
 echo "🏁"
 exit $EXIT_CODE

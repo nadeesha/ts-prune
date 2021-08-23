@@ -17,7 +17,7 @@ step "Linking ts-prune from step 1"
 npm link ts-prune
 
 step "Run ts-prune"
-ts-prune | tee outfile
+ts-prune --skip ".test.ts" | tee outfile
 
 step "Diff between outputs"
 DIFF=$(diff outfile ../outfile.base)
@@ -48,7 +48,7 @@ fi
 
 step "Cleanup"
 rm ../../package-lock.json # remnants of the npm link
-rm ./integration/testproject/outfile # generated outfile
+rm outfile # generated outfile
 
 echo "🏁"
 exit $EXIT_CODE

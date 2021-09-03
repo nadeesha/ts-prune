@@ -17,7 +17,11 @@ export const run = (config: IConfigInterface, output = console.log) => {
 
   const state = new State();
 
-  analyze(project, state.onResult, entrypoints, config.skip);
+  let skipRegex;
+  if (config.skip) {
+    skipRegex = new RegExp(config.skip);
+  }
+  analyze(project, state.onResult, entrypoints, skipRegex);
 
   const presented = present(state);
 

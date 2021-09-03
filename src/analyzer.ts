@@ -194,17 +194,16 @@ const getDefinitelyUsed = (file: SourceFile): IAnalysedResult[] => ([
 
 const getReferences = (
   originalList: SourceFileReferencingNodes[],
-  skipPattern?: string
+  skipRegex?: RegExp
 ): SourceFileReferencingNodes[] =>  {
-  if(skipPattern){
-    const regExp = new RegExp(skipPattern);
+  if(skipRegex){
     return originalList.filter(file =>
-      !regExp.test(file.getSourceFile().compilerNode.fileName)
+      !skipRegex.test(file.getSourceFile().compilerNode.fileName)
     );
   }
   return originalList;
 }
-export const getPotentiallyUnused = (file: SourceFile, skipPattern?: string): IAnalysedResult => {
+export const getPotentiallyUnused = (file: SourceFile, skipRegex?: RegExp): IAnalysedResult => {
   const exported = getExported(file);
 
   const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
@@ -217,7 +216,7 @@ export const getPotentiallyUnused = (file: SourceFile, skipPattern?: string): IA
 
   const referenced = getReferences(
     file.getReferencingNodesInOtherSourceFiles(),
-    skipPattern
+    skipRegex
   ).reduce(
       (previous, node: SourceFileReferencingNodes) => {
         const kind = node.getKind().toString();
@@ -246,10 +245,10 @@ const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) 
     type: AnalysisResultTypeEnum.DEFINITELY_USED,
   })).forEach(emittable => onResult(emittable))
 
-export const analyze = (project: Project, onResult: OnResultType, entrypoints: string[], skipPattern?: string) => {
+export const analyze = (project: Project, onResult: OnResultType, entrypoints: string[], skipRegex?: RegExp) => {
   project.getSourceFiles().forEach(file => {
     [
-      getPotentiallyUnused(file, skipPattern),
+      getPotentiallyUnused(file, skipRegex),
       ...getDefinitelyUsed(file),
     ].forEach(result => {
       if (!result.file) return // Prevent passing along a "null" filepath. Fixes #105

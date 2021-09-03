@@ -6,7 +6,7 @@ export interface IConfigInterface {
   project?: string;
   ignore?: string;
   error?: string;
-  skip?: string;
+  skip?: string[];
 }
 
 const defaultConfig: IConfigInterface = {
@@ -25,7 +25,7 @@ export const getConfig = () => {
     .option('-p, --project [project]', 'TS project configuration file (tsconfig.json)', 'tsconfig.json')
     .option('-i, --ignore [regexp]', 'Path ignore RegExp pattern')
     .option('-e, --error', 'Return error code if unused exports are found')
-    .option('-s, --skip [regexp]', 'skip these files when determining whether code is used')
+    .option('-s, --skip [regexp...]', 'skip these files when determining whether code is used')
     .parse(process.argv))
 
   const defaultConfig = {

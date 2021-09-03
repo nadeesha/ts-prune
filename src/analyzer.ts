@@ -13,7 +13,7 @@ import {
 } from "ts-morph";
 import { isDefinitelyUsedImport } from "./util/isDefinitelyUsedImport";
 import { getModuleSourceFile } from "./util/getModuleSourceFile";
-import { getNodesOfKind } from './util/getNodesOfKind';
+import { getNodesOfKind } from "./util/getNodesOfKind";
 import countBy from "lodash/fp/countBy";
 import last from "lodash/fp/last";
 import { realpathSync } from "fs";
@@ -194,16 +194,22 @@ const getDefinitelyUsed = (file: SourceFile): IAnalysedResult[] => ([
 
 const getReferences = (
   originalList: SourceFileReferencingNodes[],
-  skipRegex?: RegExp
-): SourceFileReferencingNodes[] =>  {
-  if(skipRegex){
-    return originalList.filter(file =>
-      !skipRegex.test(file.getSourceFile().compilerNode.fileName)
+  skipRegexes?: RegExp[]
+): SourceFileReferencingNodes[] => {
+  if (skipRegexes && skipRegexes.length > 0) {
+    return originalList.filter((file) =>
+      skipRegexes.some(
+        (skipRegex) =>
+          !skipRegex.test(file.getSourceFile().compilerNode.fileName)
+      )
     );
   }
   return originalList;
-}
-export const getPotentiallyUnused = (file: SourceFile, skipRegex?: RegExp): IAnalysedResult => {
+};
+export const getPotentiallyUnused = (
+  file: SourceFile,
+  skipRegexes?: RegExp[]
+): IAnalysedResult => {
   const exported = getExported(file);
 
   const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
@@ -216,20 +222,22 @@ export const getPotentiallyUnused = (file: SourceFile, skipRegex?: RegExp): IAna
 
   const referenced = getReferences(
     file.getReferencingNodesInOtherSourceFiles(),
-    skipRegex
-  ).reduce(
-      (previous, node: SourceFileReferencingNodes) => {
-        const kind = node.getKind().toString();
-        const value = nodeHandlers?.[kind]?.(node) ?? [];
+    skipRegexes
+  ).reduce((previous, node: SourceFileReferencingNodes) => {
+    const kind = node.getKind().toString();
+    const value = nodeHandlers?.[kind]?.(node) ?? [];
 
-        return previous.concat(value);
-      },
-      []
-    );
+    return previous.concat(value);
+  }, []);
 
-  const unused = referenced.includes("*") ? [] :
-    exported.filter(exp => !referenced.includes(exp.name))
-      .map(exp => ({ ...exp, usedInModule: referencedInFile.includes(exp.name) }))
+  const unused = referenced.includes("*")
+    ? []
+    : exported
+        .filter((exp) => !referenced.includes(exp.name))
+        .map((exp) => ({
+          ...exp,
+          usedInModule: referencedInFile.includes(exp.name),
+        }));
 
   return {
     file: file.getFilePath(),
@@ -238,17 +246,27 @@ export const getPotentiallyUnused = (file: SourceFile, skipRegex?: RegExp): IAna
   };
 };
 
-const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) =>
-  entrypoints.map(file => ({
-    file,
-    symbols: [],
-    type: AnalysisResultTypeEnum.DEFINITELY_USED,
-  })).forEach(emittable => onResult(emittable))
+const emitTsConfigEntrypoints = (
+  entrypoints: string[],
+  onResult: OnResultType
+) =>
+  entrypoints
+    .map((file) => ({
+      file,
+      symbols: [],
+      type: AnalysisResultTypeEnum.DEFINITELY_USED,
+    }))
+    .forEach((emittable) => onResult(emittable));
 
-export const analyze = (project: Project, onResult: OnResultType, entrypoints: string[], skipRegex?: RegExp) => {
-  project.getSourceFiles().forEach(file => {
+export const analyze = (
+  project: Project,
+  onResult: OnResultType,
+  entrypoints: string[],
+  skipRegexes?: RegExp[]
+) => {
+  project.getSourceFiles().forEach((file) => {
     [
-      getPotentiallyUnused(file, skipRegex),
+      getPotentiallyUnused(file, skipRegexes),
       ...getDefinitelyUsed(file),
     ].forEach(result => {
       if (!result.file) return // Prevent passing along a "null" filepath. Fixes #105

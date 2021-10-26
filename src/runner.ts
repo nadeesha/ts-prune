@@ -9,11 +9,14 @@ import { present } from "./presenter";
 import { IConfigInterface } from "./configurator";
 
 export const run = (config: IConfigInterface, output = console.log) => {
-  const tsConfigPath = config.project;
-  const { project } = initialize(path.join(process.cwd(), tsConfigPath));
-  const tsConfigJSON = JSON5.parse(fs.readFileSync(path.join(process.cwd(), tsConfigPath), "utf-8"));
+  const tsConfigPath = path.resolve(config.project);
+  const { project } = initialize(tsConfigPath);
+  const tsConfigJSON = JSON5.parse(fs.readFileSync(tsConfigPath, "utf-8"));
 
-  const entrypoints: string[] = tsConfigJSON?.files?.map((file: string) => path.join(process.cwd(), file)) || [];
+  const entrypoints: string[] =
+    tsConfigJSON?.files?.map((file: string) =>
+      path.resolve(path.dirname(tsConfigPath), file)
+    ) || [];
 
   const state = new State();
 

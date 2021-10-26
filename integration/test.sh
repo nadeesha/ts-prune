@@ -46,6 +46,24 @@ if ts-prune -e > /dev/null; then
   EXIT_CODE=1
 fi
 
+step "Test exit code with invalid config path"
+if ts-prune -p ./tsconfig.nonexistens.json &> /dev/null; then
+  echo "ts-prune with invalid config path didn't return error"
+  EXIT_CODE=1
+fi
+
+step "Test exit code with relative config path"
+if ! ts-prune -p ./tsconfig.json > /dev/null; then
+  echo "ts-prune with relative config path returned error"
+  EXIT_CODE=1
+fi
+
+step "Test exit code with absolute config path"
+if ! ts-prune -p $(pwd)/tsconfig.json > /dev/null; then
+  echo "ts-prune with absolute config path returned error"
+  EXIT_CODE=1
+fi
+
 step "Cleanup"
 rm ../../package-lock.json # remnants of the npm link
 rm outfile # generated outfile

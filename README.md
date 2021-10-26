@@ -15,21 +15,22 @@ Remove unused exports in your Typescript project with zero configuration.
 Install ts-prune with yarn or npm
 
 ```sh
-npm install ts-prune -g
+# npm
+npm install ts-prune --save-dev
+# yarn
+yarn add -D ts-prune
 ```
 
 ### Usage
 
-```sh
-ts-prune
-```
-
-Or you can install it in your project and alias it to a npm script in package.json.
+You can install it in your project and alias it to a npm script in package.json.
 
 ```json
+{
   "scripts": {
     "find-deadcode": "ts-prune"
   }
+}
 ```
 
 If you want to run against different Typescript configuration than tsconfig.json:
@@ -37,6 +38,11 @@ If you want to run against different Typescript configuration than tsconfig.json
 ```sh
 ts-prune -p tsconfig.dev.json
 ```
+
+### Examples
+
+- [gatsby-material-starter](https://github.com/Vagr9K/gatsby-material-starter/blob/bdeba4160319c1977c83ee90e035c7fe1bd1854c/themes/material/package.json#L147)
+- [DestinyItemManager](https://github.com/DestinyItemManager/DIM/blob/aeb43dd848b5137656e6f47812189a2beb970089/package.json#L26)
 
 ### Configuration
 ts-prune supports CLI and file configuration via [cosmiconfig](https://github.com/davidtheclark/cosmiconfig#usage) (all file formats are supported).

@@ -34,7 +34,7 @@
     "json5": "^2.1.3",
     "lodash": "^4.17.21",
     "true-myth": "^4.1.0",
-    "ts-morph": "^11.0.2"
+    "ts-morph": "^13.0.1"
   },
   "files": [
     "/lib"

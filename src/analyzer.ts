@@ -194,17 +194,16 @@ const getDefinitelyUsed = (file: SourceFile): IAnalysedResult[] => ([
 
 const getReferences = (
   originalList: SourceFileReferencingNodes[],
-  skipPattern?: string
-): SourceFileReferencingNodes[] =>  {
-  if(skipPattern){
-    const regExp = new RegExp(skipPattern);
+  skipper?: RegExp
+): SourceFileReferencingNodes[] => {
+  if (skipper) {
     return originalList.filter(file =>
-      !regExp.test(file.getSourceFile().compilerNode.fileName)
+      !skipper.test(file.getSourceFile().compilerNode.fileName)
     );
   }
   return originalList;
 }
-export const getPotentiallyUnused = (file: SourceFile, skipPattern?: string): IAnalysedResult => {
+export const getPotentiallyUnused = (file: SourceFile, skipper?: RegExp): IAnalysedResult => {
   const exported = getExported(file);
 
   const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);
@@ -217,7 +216,7 @@ export const getPotentiallyUnused = (file: SourceFile, skipPattern?: string): IA
 
   const referenced = getReferences(
     file.getReferencingNodesInOtherSourceFiles(),
-    skipPattern
+    skipper
   ).reduce(
       (previous, node: SourceFileReferencingNodes) => {
         const kind = node.getKind().toString();
@@ -246,10 +245,21 @@ const emitTsConfigEntrypoints = (entrypoints: string[], onResult: OnResultType) 
     type: AnalysisResultTypeEnum.DEFINITELY_USED,
   })).forEach(emittable => onResult(emittable))
 
+const filterSkippedFiles = (sourceFiles: SourceFile[], skipper: RegExp | undefined) => {
+  if (!skipper) {
+    return sourceFiles;
+  }
+
+  return sourceFiles.filter(file => !skipper.test(file.getSourceFile().compilerNode.fileName));
+}
+
 export const analyze = (project: Project, onResult: OnResultType, entrypoints: string[], skipPattern?: string) => {
-  project.getSourceFiles().forEach(file => {
+  const skipper = skipPattern ? new RegExp(skipPattern) : undefined;
+
+  filterSkippedFiles(project.getSourceFiles(), skipper)
+  .forEach(file => {
     [
-      getPotentiallyUnused(file, skipPattern),
+      getPotentiallyUnused(file, skipper),
       ...getDefinitelyUsed(file),
     ].forEach(result => {
       if (!result.file) return // Prevent passing along a "null" filepath. Fixes #105

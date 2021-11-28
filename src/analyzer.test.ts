@@ -97,7 +97,7 @@ describe("analyzer", () => {
 
   it("should skip source files matching a pattern", () => {
     // when bar.test.ts is exclude by the skip pattern, bar is unused
-    expect(getPotentiallyUnused(bar, ".test.ts")).toEqual({
+    expect(getPotentiallyUnused(bar, /.test.ts/)).toEqual({
       file: "/project/bar.ts",
       symbols: [
         { line: 2, name: "bar", usedInModule: false },

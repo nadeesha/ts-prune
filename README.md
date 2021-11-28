@@ -51,7 +51,7 @@ ts-prune supports CLI and file configuration via [cosmiconfig](https://github.co
 - `-p, --project` - __tsconfig.json__ path(`tsconfig.json` by default)
 - `-i, --ignore` - errors ignore RegExp pattern
 - `-e, --error` - return error code if unused exports are found
-- `-s, --skip` - skip these files when determining whether code is used. (For example, `*.test.ts?` will stop ts-prune from considering an export in test file usages)
+- `-s, --skip` - skip these files when determining whether code is used. (For example, `.test.ts?` will stop ts-prune from considering an export in test file usages)
 
 CLI configuration options:
 ```bash 

@@ -1,6 +1,13 @@
 {
   "name": "ts-prune",
   "version": "0.0.0-development",
+  "description": "Find potentially unused exports in your Typescript project with zero configuration.",
+  "keywords": [
+    "find",
+    "unused",
+    "exports",
+    "deadcode"
+  ],
   "main": "lib/index.js",
   "author": "Nadeesha Cabral <n@nadeesha.me>",
   "license": "MIT",

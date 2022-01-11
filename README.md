@@ -12,12 +12,14 @@ Find potentially unused exports in your Typescript project with zero configurati
 
 ### Installing
 
-Install ts-prune with yarn or npm
 
 ```sh
-# npm
 npm install ts-prune --save-dev
-# yarn
+```
+
+or
+
+```sh
 yarn add -D ts-prune
 ```
 

@@ -213,6 +213,13 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
         </a>
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/felladrin>
+            <img src=https://avatars.githubusercontent.com/u/418083?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Victor Nogueira/>
+            <br />
+            <sub style="font-size:14px"><b>Victor Nogueira</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/wcandillon>
             <img src=https://avatars.githubusercontent.com/u/306134?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=William Candillon/>
             <br />

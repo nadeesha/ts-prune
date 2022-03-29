@@ -57,7 +57,7 @@ CLI configuration options:
 ```bash 
 ts-prune -p my-tsconfig.json -i my-component-ignore-patterns?
 ```
-Configuration file example `ts-prunerc`: 
+Configuration file example `.ts-prunerc`: 
 ```json
 {
   "ignore": "my-component-ignore-patterns?"

@@ -116,8 +116,8 @@ describe("analyzer", () => {
     expect(getPotentiallyUnused(starExport)).toEqual({
       file: "/project/starExport.ts",
       symbols: [
-        { name: "unusedC", line: undefined, usedInModule:false },
-        { name: "UnusedT", line: undefined, usedInModule:false },
+        { name: "unusedC", line: 2, usedInModule:false },
+        { name: "UnusedT", line: 2, usedInModule:false },
       ],
       type: 0,
     });

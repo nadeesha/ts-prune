@@ -17,9 +17,14 @@ export const unusedC = 'c';
 export type UnusedT = 'T';
 `;
 
+const starExportSrc = `
+export * from './foo';
+`;
+
 const starImportSrc = `
 import * as foo from './foo';
 import {UseFoo} from './use-foo';
+import {x,y,z,w,ABC} from './starExport';
 
 const x = foo.x;
 const {y} = foo;
@@ -55,6 +60,7 @@ describe("analyzer", () => {
   const star = project.createSourceFile("/project/star.ts", starImportSrc);
   const bar = project.createSourceFile("/project/bar.ts", barSrc);
   const testBar = project.createSourceFile("/project/bar.test.ts", testBarSrc);
+  const starExport = project.createSourceFile("/project/starExport.ts", starExportSrc);
 
   it("should track import wildcards", () => {
     // TODO(danvk): rename this to importSideEffects()
@@ -101,6 +107,17 @@ describe("analyzer", () => {
       file: "/project/bar.ts",
       symbols: [
         { line: 2, name: "bar", usedInModule: false },
+      ],
+      type: 0,
+    });
+  });
+
+  it("should use line number of 'export * from' rather than line number of original export", () => {
+    expect(getPotentiallyUnused(starExport)).toEqual({
+      file: "/project/starExport.ts",
+      symbols: [
+        { name: "unusedC", line: undefined, usedInModule:false },
+        { name: "UnusedT", line: undefined, usedInModule:false },
       ],
       type: 0,
     });

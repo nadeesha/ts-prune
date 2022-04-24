@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import { State } from "./state";
 import { ResultSymbol } from "./analyzer";
 
@@ -5,7 +6,7 @@ const USED_IN_MODULE = ' (used in module)';
 
 const formatOutput = (file: string, result: ResultSymbol) => {
   const {name, line, usedInModule} = result;
-  return `${file}:${line} - ${name}` + (usedInModule ? USED_IN_MODULE : '');
+  return `${chalk.blue(file)}:${chalk.yellow(line)} - ${chalk.green(name)}` + (usedInModule ? USED_IN_MODULE : '');
 }
 
 export const present = (state: State): string[] => {

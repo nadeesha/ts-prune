@@ -1,6 +1,7 @@
 import path from "path";
 import JSON5 from "json5";
 import fs from "fs";
+import chalk from 'chalk';
 
 import { analyze } from "./analyzer";
 import { initialize } from "./initializer";
@@ -27,7 +28,8 @@ export const run = (config: IConfigInterface, output = console.log) => {
   const filterIgnored = config.ignore !== undefined ? presented.filter(file => !file.match(config.ignore)) : presented;
 
   filterIgnored.forEach(value => {
-    output(value);
+    console.log(chalk.blue(value), 'changed');
   });
+  console.log(chalk.red('lol'));
   return filterIgnored.length;
 };

@@ -21,7 +21,6 @@
     "semantic-release": "semantic-release"
   },
   "devDependencies": {
-    "@types/chalk": "^2.2.0",
     "@types/jest": "^25.2.1",
     "@types/json5": "^0.0.30",
     "@types/lodash": "^4.14.150",

@@ -28,7 +28,7 @@ export const run = (config: IConfigInterface, output = console.log) => {
   const filterIgnored = config.ignore !== undefined ? presented.filter(file => !file.match(config.ignore)) : presented;
 
   filterIgnored.forEach(value => {
-    console.log(chalk.blue(value), 'changed');
+    output(chalk.blue(value), 'changed');
   });
   console.log(chalk.red('lol'));
   return filterIgnored.length;

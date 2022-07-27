@@ -45,25 +45,30 @@ ts-prune -p tsconfig.dev.json
 - [DestinyItemManager](https://github.com/DestinyItemManager/DIM/blob/aeb43dd848b5137656e6f47812189a2beb970089/package.json#L26)
 
 ### Configuration
+
 ts-prune supports CLI and file configuration via [cosmiconfig](https://github.com/davidtheclark/cosmiconfig#usage) (all file formats are supported).
 
 #### Configuration options
+
 - `-p, --project` - __tsconfig.json__ path(`tsconfig.json` by default)
 - `-i, --ignore` - errors ignore RegExp pattern
 - `-e, --error` - return error code if unused exports are found
 - `-s, --skip` - skip these files when determining whether code is used. (For example, `.test.ts?` will stop ts-prune from considering an export in test file usages)
 
 CLI configuration options:
-```bash 
+
+```bash
 ts-prune -p my-tsconfig.json -i my-component-ignore-patterns?
 ```
-Configuration file example `ts-prunerc`: 
+
+Configuration file example `ts-prunerc`:
+
 ```json
 {
   "ignore": "my-component-ignore-patterns?"
 }
 ```
- 
+
 ### FAQ
 
 #### How do I get the count of unused exports?
@@ -74,13 +79,39 @@ ts-prune | wc -l
 
 #### How do I ignore a specific path?
 
+You can either,
+
+##### 1. Use the `-i, --ignore` configuration option:
+
+```sh
+ts-prune --ignore 'src/ignore-this-path'
+```
+
+##### 2. Use `grep -v` to filter the output:
+
 ```sh
 ts-prune | grep -v src/ignore-this-path
 ```
 
+#### How do I ignore multiple paths?
+
+You can either,
+
+##### 1. Use the `-i, --ignore` configuration option:
+
+```sh
+ts-prune --ignore 'src/ignore-this-path|src/also-ignore-this-path'
+```
+
+##### 2. Use multiple `grep -v` to filter the output:
+
+```sh
+ts-prune | grep -v src/ignore-this-path | grep -v src/also-ignore-this-path
+```
+
 #### How do I ignore a specific identifier?
 
-You can either, 
+You can either,
 
 ##### 1. Prefix the export with `// ts-prune-ignore-next`
 

@@ -12,17 +12,10 @@ const formatOutput = (file: string, result: ResultSymbol) => {
 export const present = (state: State): string[] => {
   const unused2D = state
     .definitelyUnused()
-    .map(result => {
-      const file = result.file.replace(process.cwd(), "").replace(new RegExp("^/"), "")
-      const filePath = isWin
-        ? file.replaceAll(path.win32.sep, path.posix.sep)
-        : file
-
-      return ({
-        file: filePath,
-        symbols: result.symbols
-      })
-    })
+    .map(result => ({
+      file: result.file.replace(process.cwd(), "").replace(new RegExp("^/"), ""),
+      symbols: result.symbols
+    }))
     .map(
       ({file, symbols}) => symbols.map(sym => formatOutput(file, sym))
     );

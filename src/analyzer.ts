@@ -155,12 +155,11 @@ const lineNumber = (symbol: Symbol) =>
   symbol.getDeclarations().map(decl => decl.getStartLineNumber()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity)
 
 export const getExported = (file: SourceFile) =>
-  file.getExportSymbols()
-    .filter(symbol => !mustIgnore(symbol, file))
-    .map(symbol => ({
-      name: symbol.compilerSymbol.name,
-      line: lineNumber(symbol)
-    }));
+  file.getExportSymbols().filter(symbol => !mustIgnore(symbol, file))
+  .map(symbol => ({
+    name: symbol.compilerSymbol.name,
+    line: symbol.getDeclarations().every(decl => decl.getSourceFile() === file) ? lineNumber(symbol) : undefined,
+  }));
 
 /* Returns all the "import './y';" imports, which must be for side effects */
 export const importsForSideEffects = (file: SourceFile): IAnalysedResult[] =>

@@ -1,0 +1,8 @@
+- id: ts-prune
+  name: "Search for unused exports in typescript project"
+  description: "Find unused exports in a typescript project."
+  entry: ts-prune -e
+  pass_filenames: false
+  language: node
+  types_or: [ts, tsx]
+  require_serial: true

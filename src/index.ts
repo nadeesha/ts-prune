@@ -10,7 +10,7 @@ const config = getConfig();
 const resultCount = run(config);
 
 if (resultCount > 0 && config.error){
-    process.exit(1);
+    process.exit(65); // 65 is the exit code for incorrect user data
 } else {
     process.exit(0);
 }

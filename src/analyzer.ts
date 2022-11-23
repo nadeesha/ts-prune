@@ -57,7 +57,7 @@ function handleImportDeclaration(node: ImportDeclaration) {
  *
  * If there are uses which cannot be tracked, this returns ["*"].
  */
-export const trackWildcardUses = (node: ImportDeclaration) => {
+const trackWildcardUses = (node: ImportDeclaration) => {
   const clause = node.getImportClause();
   const namespaceImport = clause.getFirstChildByKind(ts.SyntaxKind.NamespaceImport);
   const source = node.getSourceFile();
@@ -154,7 +154,7 @@ const mustIgnore = (symbol: Symbol, file: SourceFile) => {
 const lineNumber = (symbol: Symbol) =>
   symbol.getDeclarations().map(decl => decl.getStartLineNumber()).reduce((currentMin, current) => Math.min(currentMin, current), Infinity)
 
-export const getExported = (file: SourceFile) =>
+const getExported = (file: SourceFile) =>
   file.getExportSymbols().filter(symbol => !mustIgnore(symbol, file))
   .map(symbol => ({
     name: symbol.compilerSymbol.name,
@@ -162,7 +162,7 @@ export const getExported = (file: SourceFile) =>
   }));
 
 /* Returns all the "import './y';" imports, which must be for side effects */
-export const importsForSideEffects = (file: SourceFile): IAnalysedResult[] =>
+const importsForSideEffects = (file: SourceFile): IAnalysedResult[] =>
   file
     .getImportDeclarations()
     .map(decl => ({
@@ -202,7 +202,7 @@ const getReferences = (
   }
   return originalList;
 }
-export const getPotentiallyUnused = (file: SourceFile, skipper?: RegExp): IAnalysedResult => {
+const getPotentiallyUnused = (file: SourceFile, skipper?: RegExp): IAnalysedResult => {
   const exported = getExported(file);
 
   const idsInFile = file.getDescendantsOfKind(ts.SyntaxKind.Identifier);

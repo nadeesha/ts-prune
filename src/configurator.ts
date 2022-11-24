@@ -4,7 +4,7 @@ import pick from "lodash/fp/pick";
 
 export interface IConfigInterface {
   project?: string;
-  ignore?: string;
+  ignore?: string | string[];
   error?: string;
   skip?: string;
 }

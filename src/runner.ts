@@ -8,6 +8,14 @@ import { State } from "./state";
 import { present } from "./presenter";
 import { IConfigInterface } from "./configurator";
 
+const getIgnorePatterns = (configIgnore: IConfigInterface['ignore']): string[] => {
+  switch(typeof configIgnore) {
+    case 'undefined': return [];
+    case 'string': return [configIgnore];
+    case 'object': return configIgnore;
+  }
+};
+
 export const run = (config: IConfigInterface, output = console.log) => {
   const tsConfigPath = path.resolve(config.project);
   const { project } = initialize(tsConfigPath);
@@ -24,7 +32,11 @@ export const run = (config: IConfigInterface, output = console.log) => {
 
   const presented = present(state);
 
-  const filterIgnored = config.ignore !== undefined ? presented.filter(file => !file.match(config.ignore)) : presented;
+  const ignorePatterns = getIgnorePatterns(config.ignore);
+
+  const filterIgnored = ignorePatterns.length > 0
+    ? presented.filter(file => !ignorePatterns.some(pattern => file.match(pattern)))
+    : presented;
 
   filterIgnored.forEach(value => {
     output(value);

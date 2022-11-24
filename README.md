@@ -69,6 +69,17 @@ Configuration file example `.ts-prunerc`:
 }
 ```
 
+You can also put multiple ignore patterns.
+
+```json
+{
+  "ignore": [
+    "my-component-ignore-patterns?",
+    "my-other-component-ignore-patterns?"
+  ]
+}
+```
+
 ### FAQ
 
 #### How do I get the count of unused exports?
@@ -107,6 +118,17 @@ ts-prune --ignore 'src/ignore-this-path|src/also-ignore-this-path'
 
 ```sh
 ts-prune | grep -v src/ignore-this-path | grep -v src/also-ignore-this-path
+```
+
+##### 3. Use the `.ts-prunerc` configuration file `ignore` option:
+
+```json
+{
+  "ignore": [
+    "src/ignore-this-path",
+    "src/also-ignore-this-path"
+  ]
+}
 ```
 
 #### How do I ignore a specific identifier?

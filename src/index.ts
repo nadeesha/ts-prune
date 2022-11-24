@@ -2,6 +2,7 @@
 export { IConfigInterface } from "./configurator";
 export { run } from "./runner";
 export { ResultSymbol } from "./analyzer";
+export type { JSONOutput, JSONOutputItem } from './presenter';
 
 import { getConfig } from "./configurator";
 import { run } from "./runner";

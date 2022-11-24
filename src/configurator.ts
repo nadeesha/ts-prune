@@ -3,10 +3,11 @@ import program from "commander";
 import pick from "lodash/fp/pick";
 
 export interface IConfigInterface {
-  project?: string;
+  project: string;
   ignore?: string;
   error?: string;
   skip?: string;
+  output: 'text' | 'json';
 }
 
 const defaultConfig: IConfigInterface = {
@@ -14,6 +15,7 @@ const defaultConfig: IConfigInterface = {
   ignore: undefined,
   error: undefined,
   skip: undefined,
+  output: 'text',
 }
 
 const onlyKnownConfigOptions = pick(Object.keys(defaultConfig));
@@ -26,11 +28,8 @@ export const getConfig = () => {
     .option('-i, --ignore [regexp]', 'Path ignore RegExp pattern')
     .option('-e, --error', 'Return error code if unused exports are found')
     .option('-s, --skip [regexp]', 'skip these files when determining whether code is used')
+    .option('-o, --output [output]', 'Set output: "text" or "json". Default: "text"', /text|json/)
     .parse(process.argv))
-
-  const defaultConfig = {
-    project: "tsconfig.json"
-  }
 
   const moduleName = 'ts-prune';
   const explorerSync = cosmiconfigSync(moduleName);

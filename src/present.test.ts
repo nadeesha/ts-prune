@@ -20,9 +20,9 @@ describe("present", () => {
     ].forEach((result) => state.onResult(result));
 
     it("should produce a presentable output", () => {
-      expect(JSON.stringify(present(state))).toMatchInlineSnapshot(
-        `"[\\"foo.ts:0 - foo\\",\\"bar.ts:0 - bar\\"]"`
-      );
+      expect(
+        JSON.stringify(present(state, { output: "text" }))
+      ).toMatchInlineSnapshot(`"[\\"foo.ts:0 - foo\\",\\"bar.ts:0 - bar\\"]"`);
     });
   });
 
@@ -43,7 +43,9 @@ describe("present", () => {
     ].forEach((result) => state.onResult(result));
 
     it("should produce an empty output", () => {
-      expect(JSON.stringify(present(state))).toBe(JSON.stringify([]));
+      expect(JSON.stringify(present(state, { output: "text" }))).toBe(
+        JSON.stringify([])
+      );
     });
   });
 
@@ -64,8 +66,48 @@ describe("present", () => {
     ].forEach((result) => state.onResult(result));
 
     it("should produce a presentable output", () => {
-      expect(JSON.stringify(present(state))).toMatchInlineSnapshot(
+      expect(
+        JSON.stringify(present(state, { output: "text" }))
+      ).toMatchInlineSnapshot(
         `"[\\"foo.ts:0 - foo (used in module)\\",\\"bar.ts:0 - bar\\"]"`
+      );
+    });
+  });
+
+  describe("when output config is set to json, and given state with unused exports", () => {
+    const state = new State();
+
+    [
+      {
+        type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
+        symbols: [{ name: "foo", line: 0, usedInModule: false }],
+        file: "foo.ts",
+      },
+      {
+        type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
+        symbols: [{ name: "bar", line: 0, usedInModule: false }],
+        file: "bar.ts",
+      },
+    ].forEach((result) => state.onResult(result));
+
+    it("should produce a json output", () => {
+      expect(present(state, { output: "json" })).toEqual(
+        [
+          JSON.stringify([
+            {
+              filePath: "foo.ts",
+              line: 0,
+              name: "foo",
+              usedInModule: false,
+            },
+            {
+              filePath: "bar.ts",
+              line: 0,
+              name: "bar",
+              usedInModule: false,
+            },
+          ]),
+        ]
       );
     });
   });

@@ -22,12 +22,10 @@ export const run = (config: IConfigInterface, output = console.log) => {
 
   analyze(project, state.onResult, entrypoints, config.skip);
 
-  const presented = present(state);
+  const presented = present(state, config);
 
-  const filterIgnored = config.ignore !== undefined ? presented.filter(file => !file.match(config.ignore)) : presented;
-
-  filterIgnored.forEach(value => {
+  presented.forEach(value => {
     output(value);
   });
-  return filterIgnored.length;
+  return presented.length;
 };

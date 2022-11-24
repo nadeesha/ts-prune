@@ -1,24 +1,42 @@
 import chalk from 'chalk';
 import { State } from "./state";
-import { ResultSymbol } from "./analyzer";
+import { IConfigInterface } from './configurator';
+
+type JSONOutput = {
+  filePath: string;
+  line?: number;
+  name: string;
+  usedInModule: boolean;
+};
 
 const USED_IN_MODULE = ' (used in module)';
 
-const formatOutput = (file: string, result: ResultSymbol) => {
-  const {name, line, usedInModule} = result;
-  return `${chalk.green(file)}:${chalk.yellow(line)} - ${chalk.cyan(name)}` + (usedInModule ? `${chalk.grey(USED_IN_MODULE)}` : '');
-}
+const presentText = (jsonResults: JSONOutput[]): string[] => jsonResults.map(({ filePath, line, name, usedInModule }) =>
+  `${chalk.green(filePath)}:${chalk.yellow(line)} - ${chalk.cyan(name)}`
+  + (usedInModule ? `${chalk.grey(USED_IN_MODULE)}` : '')
+);
 
-export const present = (state: State): string[] => {
-  const unused2D = state
-    .definitelyUnused()
-    .map(result => ({
-      file: result.file.replace(process.cwd(), "").replace(new RegExp("^/"), ""),
-      symbols: result.symbols
-    }))
-    .map(
-      ({file, symbols}) => symbols.map(sym => formatOutput(file, sym))
-    );
+const presentJSON = (jsonResults: JSONOutput[]): string[] => [JSON.stringify(jsonResults)];
 
-  return [].concat.apply([], unused2D);
+export const present = (state: State, { output, ignore }: Pick<IConfigInterface, 'output' | 'ignore'>): string[] => {
+  const jsonResults = state.definitelyUnused()
+    .flatMap(({ file, symbols }) => {
+      const filePath = file.replace(process.cwd(), "").replace(new RegExp("^/"), "");
+
+      if(typeof ignore !== 'undefined' && filePath.match(ignore)) {
+        return [];
+      }
+
+      return symbols.map(({ name, line, usedInModule }): JSONOutput => ({
+        filePath,
+        line,
+        name,
+        usedInModule
+      }));
+    });
+
+  switch(output) {
+    case 'text': return presentText(jsonResults);
+    case 'json': return presentJSON(jsonResults);
+  }
 };

@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import { State } from "./state";
 import { ResultSymbol } from "./analyzer";
 
-const USED_IN_MODULE = ' (used in module)';
+export const USED_IN_MODULE = ' (used in module)';
 
 const formatOutput = (file: string, result: ResultSymbol) => {
   const {name, line, usedInModule} = result;

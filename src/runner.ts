@@ -5,7 +5,7 @@ import fs from "fs";
 import { analyze } from "./analyzer";
 import { initialize } from "./initializer";
 import { State } from "./state";
-import { present } from "./presenter";
+import { present, USED_IN_MODULE } from "./presenter";
 import { IConfigInterface } from "./configurator";
 
 export const run = (config: IConfigInterface, output = console.log) => {
@@ -24,7 +24,8 @@ export const run = (config: IConfigInterface, output = console.log) => {
 
   const presented = present(state);
 
-  const filterIgnored = config.ignore !== undefined ? presented.filter(file => !file.match(config.ignore)) : presented;
+  const filterUsedInModule = config.unusedInModule !== undefined ? presented.filter(file => !file.includes(USED_IN_MODULE)) : presented;
+  const filterIgnored = config.ignore !== undefined ? filterUsedInModule.filter(file => !file.match(config.ignore)) : filterUsedInModule;
 
   filterIgnored.forEach(value => {
     output(value);

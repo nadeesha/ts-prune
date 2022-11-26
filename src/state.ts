@@ -5,7 +5,7 @@ export class State {
   private results: Array<IAnalysedResult> = [];
 
   private resultsOfType = (type: AnalysisResultTypeEnum) =>
-    this.results.filter(r => r.type === type);
+    this.results.filter((r) => r.type === type);
 
   onResult = (result: IAnalysedResult) => {
     this.results.push(result);
@@ -13,9 +13,8 @@ export class State {
 
   definitelyUnused = () =>
     differenceBy<IAnalysedResult, IAnalysedResult>(
-      result => result.file,
+      (result) => result.file,
       this.resultsOfType(AnalysisResultTypeEnum.POTENTIALLY_UNUSED),
       this.resultsOfType(AnalysisResultTypeEnum.DEFINITELY_USED)
-    )
-      .filter(result => result.symbols.length > 0)
+    ).filter((result) => result.symbols.length > 0);
 }

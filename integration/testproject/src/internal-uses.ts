@@ -4,7 +4,7 @@
 // However, it is used in this file, so it's not dead code.
 export const usedInThisFile = {};
 
-export const thisOneIsUnused = {...usedInThisFile};
+export const thisOneIsUnused = { ...usedInThisFile };
 
 export interface UsedInThisFile {}
 

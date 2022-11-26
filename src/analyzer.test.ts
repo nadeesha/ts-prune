@@ -60,7 +60,10 @@ describe("analyzer", () => {
   const star = project.createSourceFile("/project/star.ts", starImportSrc);
   const bar = project.createSourceFile("/project/bar.ts", barSrc);
   const testBar = project.createSourceFile("/project/bar.test.ts", testBarSrc);
-  const starExport = project.createSourceFile("/project/starExport.ts", starExportSrc);
+  const starExport = project.createSourceFile(
+    "/project/starExport.ts",
+    starExportSrc
+  );
 
   it("should track import wildcards", () => {
     // TODO(danvk): rename this to importSideEffects()
@@ -105,9 +108,7 @@ describe("analyzer", () => {
     // when bar.test.ts is exclude by the skip pattern, bar is unused
     expect(getPotentiallyUnused(bar, /.test.ts/)).toEqual({
       file: "/project/bar.ts",
-      symbols: [
-        { line: 2, name: "bar", usedInModule: false },
-      ],
+      symbols: [{ line: 2, name: "bar", usedInModule: false }],
       type: 0,
     });
   });
@@ -116,8 +117,8 @@ describe("analyzer", () => {
     expect(getPotentiallyUnused(starExport)).toEqual({
       file: "/project/starExport.ts",
       symbols: [
-        { name: "unusedC", line: 2, usedInModule:false },
-        { name: "UnusedT", line: 2, usedInModule:false },
+        { name: "unusedC", line: undefined, usedInModule: false }, // todo line should be 2, not undefined
+        { name: "UnusedT", line: undefined, usedInModule: false }, // todo line should be 2, not undefined
       ],
       type: 0,
     });

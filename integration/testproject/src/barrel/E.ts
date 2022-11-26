@@ -1,1 +1,1 @@
-export type KualaOrLumpur = 'Kuala' | 'Lumpur';
+export type KualaOrLumpur = "Kuala" | "Lumpur";

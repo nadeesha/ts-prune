@@ -1,2 +1,2 @@
-export { KualaOrLumpur } from './E';
+export { KualaOrLumpur } from "./E";
 export * from "./F";

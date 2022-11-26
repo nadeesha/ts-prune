@@ -9,8 +9,8 @@ import { run } from "./runner";
 const config = getConfig();
 const resultCount = run(config);
 
-if (resultCount > 0 && config.error){
-    process.exit(1);
+if (resultCount > 0 && config.error) {
+  process.exit(1);
 } else {
-    process.exit(0);
+  process.exit(0);
 }

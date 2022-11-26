@@ -8,16 +8,9 @@
     "outDir": "lib",
     "sourceMap": true,
     "declaration": true,
-    "lib": [
-      "esnext"
-    ],
+    "lib": ["esnext"],
     "esModuleInterop": true
   },
-  "files": [
-    "src/index.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ]
+  "files": ["src/index.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }

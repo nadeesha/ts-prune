@@ -24,9 +24,12 @@ export const run = (config: IConfigInterface, output = console.log) => {
 
   const presented = present(state);
 
-  const filterIgnored = config.ignore !== undefined ? presented.filter(file => !file.match(config.ignore)) : presented;
+  const filterIgnored =
+    config.ignore !== undefined
+      ? presented.filter((file) => !file.match(config.ignore))
+      : presented;
 
-  filterIgnored.forEach(value => {
+  filterIgnored.forEach((value) => {
     output(value);
   });
   return filterIgnored.length;

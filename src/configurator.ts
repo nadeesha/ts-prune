@@ -28,7 +28,7 @@ export const getConfig = () => {
     .option('-i, --ignore [regexp]', 'Path ignore RegExp pattern')
     .option('-e, --error', 'Return error code if unused exports are found')
     .option('-s, --skip [regexp]', 'skip these files when determining whether code is used')
-    .option('-u, --unusedInModule', 'only count unused exports not used in module')
+    .option('-u, --unusedInModule', 'Skip files that are used in module (marked as `used in module`)')
     .parse(process.argv))
 
   const defaultConfig = {

@@ -253,7 +253,7 @@ export const getPotentiallyUnused = (
     symbols: includeUsed
       ? unused
       : unused.filter((unusedSymbol) => {
-          return unusedSymbol.usedInModule;
+          return unusedSymbol.usedInModule === false;
         }),
     type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
   };
@@ -290,11 +290,12 @@ export const analyze = (
   entryPoints: string[],
   config: IConfigInterface
 ) => {
+  console.log("config", config);
   const skipper = config.skip ? new RegExp(config.skip) : undefined;
 
   filterSkippedFiles(project.getSourceFiles(), skipper).forEach((file) => {
     [
-      getPotentiallyUnused(file, skipper, config.includeUsed),
+      getPotentiallyUnused(file, skipper, !!config.includeUsed),
       ...getDefinitelyUsed(file),
     ].forEach((result) => {
       if (!result.file) return; // Prevent passing along a "null" filepath. Fixes #105

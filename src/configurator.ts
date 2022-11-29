@@ -31,7 +31,6 @@ export const getConfig = () => {
     .parse(process.argv);
   // @ts-expect-error
   const cliConfig = program.opts();
-  console.log("cliConfig", cliConfig);
 
   const defaultConfig = {
     project: "tsconfig.json",

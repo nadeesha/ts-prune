@@ -1,11 +1,12 @@
 {
-  "name": "ts-prune",
-  "version": "0.10.4",
+  "name": "@capaj/ts-prune",
+  "version": "0.11.0",
   "description": "Find potentially unused exports in your Typescript project with zero configuration.",
   "keywords": [
     "find",
     "unused",
     "exports",
+    "typescript",
     "deadcode"
   ],
   "main": "lib/index.js",

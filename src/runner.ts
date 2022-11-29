@@ -13,14 +13,14 @@ export const run = (config: IConfigInterface, output = console.log) => {
   const { project } = initialize(tsConfigPath);
   const tsConfigJSON = JSON5.parse(fs.readFileSync(tsConfigPath, "utf-8"));
 
-  const entrypoints: string[] =
+  const entryPoints: string[] =
     tsConfigJSON?.files?.map((file: string) =>
       path.resolve(path.dirname(tsConfigPath), file)
     ) || [];
 
   const state = new State();
 
-  analyze(project, state.onResult, entrypoints, config.skip);
+  analyze(project, state.onResult, entryPoints, config);
 
   const presented = present(state);
 

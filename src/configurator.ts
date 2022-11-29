@@ -32,7 +32,10 @@ export const getConfig = () => {
       )
       .option("-i, --ignore [regexp]", "Path ignore RegExp pattern")
       .option("-e, --error", "Return error code if unused exports are found")
-      .option("-u, --includeUsed", "Include used exports in output")
+      .option(
+        "-u, --includeUsed",
+        "Include used exports in output, if not provided only unused exports are included"
+      )
       .option(
         "-s, --skip [regexp]",
         "skip these files when determining whether code is used"

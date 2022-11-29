@@ -214,7 +214,8 @@ const getReferences = (
 };
 export const getPotentiallyUnused = (
   file: SourceFile,
-  skipper?: RegExp
+  skipper?: RegExp,
+  includeUsed?: boolean
 ): IAnalysedResult => {
   const exported = getExported(file);
 
@@ -241,6 +242,7 @@ export const getPotentiallyUnused = (
     ? []
     : exported
         .filter((exp) => !referenced.includes(exp.name))
+
         .map((exp) => ({
           ...exp,
           usedInModule: referencedInFile.includes(exp.name),
@@ -248,16 +250,20 @@ export const getPotentiallyUnused = (
 
   return {
     file: file.getFilePath(),
-    symbols: unused,
+    symbols: includeUsed
+      ? unused
+      : unused.filter((unusedSymbol) => {
+          return unusedSymbol.usedInModule;
+        }),
     type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
   };
 };
 
-const emitTsConfigEntrypoints = (
-  entrypoints: string[],
+const emitTsConfigEntryPoints = (
+  entryPoints: string[],
   onResult: OnResultType
 ) =>
-  entrypoints
+  entryPoints
     .map((file) => ({
       file,
       symbols: [],
@@ -281,19 +287,21 @@ const filterSkippedFiles = (
 export const analyze = (
   project: Project,
   onResult: OnResultType,
-  entrypoints: string[],
-  skipPattern?: string
+  entryPoints: string[],
+  config: IConfigInterface
 ) => {
-  const skipper = skipPattern ? new RegExp(skipPattern) : undefined;
+  const skipper = config.skip ? new RegExp(config.skip) : undefined;
 
   filterSkippedFiles(project.getSourceFiles(), skipper).forEach((file) => {
-    [getPotentiallyUnused(file, skipper), ...getDefinitelyUsed(file)].forEach(
-      (result) => {
-        if (!result.file) return; // Prevent passing along a "null" filepath. Fixes #105
-        onResult({ ...result, file: realpathSync(result.file) });
-      }
-    );
+    [
+      getPotentiallyUnused(file, skipper, config.includeUsed),
+      ...getDefinitelyUsed(file),
+    ].forEach((result) => {
+      if (!result.file) return; // Prevent passing along a "null" filepath. Fixes #105
+
+      onResult({ ...result, file: realpathSync(result.file) });
+    });
   });
 
-  emitTsConfigEntrypoints(entrypoints, onResult);
+  emitTsConfigEntryPoints(entryPoints, onResult);
 };

@@ -5,8 +5,9 @@ import { ResultSymbol } from "./analyzer";
 const USED_IN_MODULE = ' (used in module)';
 
 const formatOutput = (file: string, result: ResultSymbol) => {
-  const {name, line, usedInModule} = result;
-  return `${chalk.green(file)}:${chalk.yellow(line)} - ${chalk.cyan(name)}` + (usedInModule ? `${chalk.grey(USED_IN_MODULE)}` : '');
+  const { name, line, usedInModule } = result;
+  const linePart = line ? `:${chalk.yellow(line)}` : '';
+  return `${chalk.green(file)}${linePart} - ${chalk.cyan(name)}` + (usedInModule ? `${chalk.grey(USED_IN_MODULE)}` : '');
 }
 
 export const present = (state: State): string[] => {

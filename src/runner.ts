@@ -10,7 +10,7 @@ import { IConfigInterface } from "./configurator";
 
 export const run = (config: IConfigInterface, output = console.log) => {
   const tsConfigPath = path.resolve(config.project);
-  const { project } = initialize(tsConfigPath);
+  const { project } = initialize(tsConfigPath, config);
   const tsConfigJSON = JSON5.parse(fs.readFileSync(tsConfigPath, "utf-8"));
 
   const entrypoints: string[] =
@@ -26,8 +26,13 @@ export const run = (config: IConfigInterface, output = console.log) => {
 
   const filterIgnored = config.ignore !== undefined ? presented.filter(file => !file.match(config.ignore)) : presented;
 
-  filterIgnored.forEach(value => {
-    output(value);
-  });
+  if (filterIgnored.length > 0) {
+    filterIgnored.forEach(value => {
+      output(value);
+    });
+  } else {
+    output('Yay, no dead code!');
+  }
+  
   return filterIgnored.length;
 };

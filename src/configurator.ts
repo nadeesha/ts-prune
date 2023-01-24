@@ -7,6 +7,7 @@ export interface IConfigInterface {
   ignore?: string;
   error?: string;
   skip?: string;
+  internalDependencies?: string[];
 }
 
 const defaultConfig: IConfigInterface = {
@@ -14,6 +15,7 @@ const defaultConfig: IConfigInterface = {
   ignore: undefined,
   error: undefined,
   skip: undefined,
+  internalDependencies: undefined,
 }
 
 const onlyKnownConfigOptions = pick(Object.keys(defaultConfig));
@@ -22,10 +24,11 @@ const onlyKnownConfigOptions = pick(Object.keys(defaultConfig));
 export const getConfig = () => {
   const cliConfig = onlyKnownConfigOptions(program
     .allowUnknownOption() // required for tests passing in unknown options (ex: https://github.com/nadeesha/ts-prune/runs/1125728070)
-    .option('-p, --project [project]', 'TS project configuration file (tsconfig.json)', 'tsconfig.json')
+    .option('-p, --project [project]', 'TS project configuration file (tsconfig.json)')
     .option('-i, --ignore [regexp]', 'Path ignore RegExp pattern')
     .option('-e, --error', 'Return error code if unused exports are found')
     .option('-s, --skip [regexp]', 'skip these files when determining whether code is used')
+    .option('-d, --internal-dependencies [[module]]', 'Internal dependencies that should be resolved to src/ instead of dist/')
     .parse(process.argv))
 
   const defaultConfig = {

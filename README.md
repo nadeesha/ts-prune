@@ -1,5 +1,36 @@
 ![Build](https://img.shields.io/github/workflow/status/nadeesha/ts-prune/Run%20CI%20Pipeline) ![npm](https://img.shields.io/npm/dm/ts-prune) ![GitHub issues](https://img.shields.io/github/issues-raw/nadeesha/ts-prune)
 
+# 🚨 ts-prune is going into maintanence mode
+
+<details>
+<summary>More details</summary>
+
+I started ts-prune to find a sustainable way to detect unused exports in Typescript code. Due to the absence of native APIs that enable this, the best way forward was to consolidate a few hacks together that did this semi-elegantly for _most_ usecases.
+
+However, due to the popularity of ts-prune, it has absorbed more use cases, and complexity has bloated to the point that I'm no longer comfortable to add more features or do any other changes to the core system.
+
+The most important thing for ts-prune is to be backwards compatible and reliable for existing use cases.
+
+## What will happen
+
+- Critical bug fixes
+- Patching vulnerabilities in third party code
+
+## What will not happen
+
+- Entertaining feature requests
+- Accepting PRs for net new features of refactors
+
+## Notes for the future
+
+- This is a feature Typescript should support natively, and each "hack" has a bunch of trade-offs.
+- Due to the sheer fragmentation of TS/JS ecosystem between frameworks, package managers etc a non-native solution will result in complexity bloat.
+- At this point, the maintainer has two choices
+  1. Aggresively defend against feature requests, changes and anger the open-source community
+  2. Accept complexity bloat, and dedicate time and energy for compaction
+  
+</details>
+
 # ts-prune
 
 Find potentially unused exports in your Typescript project with zero configuration.

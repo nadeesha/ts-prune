@@ -232,6 +232,13 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
         </a>
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/hduprat>
+            <img src=https://avatars.githubusercontent.com/u/3397791?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Hugo Duprat/>
+            <br />
+            <sub style="font-size:14px"><b>Hugo Duprat</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/ivosh>
             <img src=https://avatars.githubusercontent.com/u/1327828?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Ivo Raisr/>
             <br />
@@ -245,6 +252,8 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
             <sub style="font-size:14px"><b>Jacob Bandes-Storch</b></sub>
         </a>
     </td>
+</tr>
+<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/koddsson>
             <img src=https://avatars.githubusercontent.com/u/318208?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Kristján Oddsson/>
@@ -252,8 +261,6 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
             <sub style="font-size:14px"><b>Kristján Oddsson</b></sub>
         </a>
     </td>
-</tr>
-<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/mqqza>
             <img src=https://avatars.githubusercontent.com/u/9381249?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Mikhail Belyaev/>
@@ -289,6 +296,8 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
             <sub style="font-size:14px"><b>Tim Bodeit</b></sub>
         </a>
     </td>
+</tr>
+<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/sauntimo>
             <img src=https://avatars.githubusercontent.com/u/2720466?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Tim Saunders/>
@@ -296,8 +305,6 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
             <sub style="font-size:14px"><b>Tim Saunders</b></sub>
         </a>
     </td>
-</tr>
-<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/torkelrogstad>
             <img src=https://avatars.githubusercontent.com/u/16610775?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Torkel Rogstad/>

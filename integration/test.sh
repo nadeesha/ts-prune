@@ -34,6 +34,24 @@ else
   EXIT_CODE=0
 fi
 
+step "Run ts-prune with --unusedInModule option"
+ts-prune --skip "skip.me" --unusedInModule | tee outfile_unusedInModules
+
+step "Diff between outputs"
+DIFF=$(diff outfile_unusedInModules ../outfile_unusedInModules.base)
+EXIT_CODE=2
+if [ "$DIFF" != "" ] 
+then
+  echo "The output was not the same as the base"
+  echo "---"
+  diff outfile_unusedInModules ../outfile_unusedInModules.base
+  echo "---"
+  EXIT_CODE=1
+else
+  echo "Everything seems to be match! 🎉"
+  EXIT_CODE=0
+fi
+
 step "Test exit code with no error flag"
 if ! ts-prune > /dev/null; then
   echo "ts-prune with no error flag returned error"
@@ -67,6 +85,7 @@ fi
 step "Cleanup"
 rm ../../package-lock.json # remnants of the npm link
 rm outfile # generated outfile
+rm outfile_unusedInModules # generated outfile
 
 echo "🏁"
 exit $EXIT_CODE

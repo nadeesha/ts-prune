@@ -85,6 +85,7 @@ ts-prune supports CLI and file configuration via [cosmiconfig](https://github.co
 - `-i, --ignore` - errors ignore RegExp pattern
 - `-e, --error` - return error code if unused exports are found
 - `-s, --skip` - skip these files when determining whether code is used. (For example, `.test.ts?` will stop ts-prune from considering an export in test file usages)
+- `-u, --unusedInModule` - skip files that are used in module (marked as `used in module`)
 
 CLI configuration options:
 

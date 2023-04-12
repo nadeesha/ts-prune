@@ -1,6 +1,6 @@
 ![Build](https://img.shields.io/github/workflow/status/nadeesha/ts-prune/Run%20CI%20Pipeline) ![npm](https://img.shields.io/npm/dm/ts-prune) ![GitHub issues](https://img.shields.io/github/issues-raw/nadeesha/ts-prune)
 
-# 🚨 ts-prune is going into maintanence mode
+# 🚨 ts-prune is going into maintenance mode
 
 <details>
 <summary>More details</summary>

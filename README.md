@@ -2,6 +2,8 @@
 
 # 🚨 ts-prune is going into maintanence mode
 
+Please use [knip](https://github.com/webpro/knip) which carries on the spirit.
+
 <details>
 <summary>More details</summary>
 

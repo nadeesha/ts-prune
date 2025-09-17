@@ -204,93 +204,14 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
         </a>
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/amir-arad>
-            <img src=https://avatars.githubusercontent.com/u/6019373?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Amir Arad/>
-            <br />
-            <sub style="font-size:14px"><b>Amir Arad</b></sub>
-        </a>
-    </td>
-</tr>
-<tr>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/ashokdelphia>
-            <img src=https://avatars.githubusercontent.com/u/48444234?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Ashok Argent-Katwala/>
-            <br />
-            <sub style="font-size:14px"><b>Ashok Argent-Katwala</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/calebpeterson>
-            <img src=https://avatars.githubusercontent.com/u/18555288?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Caleb Peterson/>
-            <br />
-            <sub style="font-size:14px"><b>Caleb Peterson</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/dgraham>
-            <img src=https://avatars.githubusercontent.com/u/122102?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=David Graham/>
-            <br />
-            <sub style="font-size:14px"><b>David Graham</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/daviseford>
-            <img src=https://avatars.githubusercontent.com/u/9663863?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Davis Ford/>
-            <br />
-            <sub style="font-size:14px"><b>Davis Ford</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/hduprat>
-            <img src=https://avatars.githubusercontent.com/u/3397791?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Hugo Duprat/>
-            <br />
-            <sub style="font-size:14px"><b>Hugo Duprat</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/ivosh>
-            <img src=https://avatars.githubusercontent.com/u/1327828?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Ivo Raisr/>
-            <br />
-            <sub style="font-size:14px"><b>Ivo Raisr</b></sub>
-        </a>
-    </td>
-</tr>
-<tr>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/jtbandes>
-            <img src=https://avatars.githubusercontent.com/u/14237?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Jacob Bandes-Storch/>
-            <br />
-            <sub style="font-size:14px"><b>Jacob Bandes-Storch</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/koddsson>
-            <img src=https://avatars.githubusercontent.com/u/318208?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Kristján Oddsson/>
-            <br />
-            <sub style="font-size:14px"><b>Kristján Oddsson</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/mqqza>
-            <img src=https://avatars.githubusercontent.com/u/9381249?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Mikhail Belyaev/>
-            <br />
-            <sub style="font-size:14px"><b>Mikhail Belyaev</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/rubengmurray>
-            <img src=https://avatars.githubusercontent.com/u/31162373?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Reece Daniels/>
-            <br />
-            <sub style="font-size:14px"><b>Reece Daniels</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/SimonJang>
             <img src=https://avatars.githubusercontent.com/u/10977475?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Simon Jang/>
             <br />
             <sub style="font-size:14px"><b>Simon Jang</b></sub>
         </a>
     </td>
+</tr>
+<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/gitter-badger>
             <img src=https://avatars.githubusercontent.com/u/8518239?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=The Gitter Badger/>
@@ -298,8 +219,6 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
             <sub style="font-size:14px"><b>The Gitter Badger</b></sub>
         </a>
     </td>
-</tr>
-<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/timbodeit>
             <img src=https://avatars.githubusercontent.com/u/4222754?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Tim Bodeit/>
@@ -335,6 +254,8 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
             <sub style="font-size:14px"><b>William Candillon</b></sub>
         </a>
     </td>
+</tr>
+<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/curtvict>
             <img src=https://avatars.githubusercontent.com/u/96080054?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=curtvict/>
@@ -342,13 +263,83 @@ ts-prune | grep -v ignoreThisThroughoutMyCodebase
             <sub style="font-size:14px"><b>curtvict</b></sub>
         </a>
     </td>
-</tr>
-<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/phiresky>
             <img src=https://avatars.githubusercontent.com/u/2303841?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=phiresky/>
             <br />
             <sub style="font-size:14px"><b>phiresky</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/rubengmurray>
+            <img src=https://avatars.githubusercontent.com/u/31162373?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Reece Daniels/>
+            <br />
+            <sub style="font-size:14px"><b>Reece Daniels</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/mqqza>
+            <img src=https://avatars.githubusercontent.com/u/9381249?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Mikhail Belyaev/>
+            <br />
+            <sub style="font-size:14px"><b>Mikhail Belyaev</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/jtbandes>
+            <img src=https://avatars.githubusercontent.com/u/14237?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Jacob Bandes-Storch/>
+            <br />
+            <sub style="font-size:14px"><b>Jacob Bandes-Storch</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/ivosh>
+            <img src=https://avatars.githubusercontent.com/u/1327828?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Ivo Raisr/>
+            <br />
+            <sub style="font-size:14px"><b>Ivo Raisr</b></sub>
+        </a>
+    </td>
+</tr>
+<tr>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/hduprat>
+            <img src=https://avatars.githubusercontent.com/u/3397791?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Hugo Duprat/>
+            <br />
+            <sub style="font-size:14px"><b>Hugo Duprat</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/daviseford>
+            <img src=https://avatars.githubusercontent.com/u/9663863?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Davis Ford/>
+            <br />
+            <sub style="font-size:14px"><b>Davis Ford</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/dgraham>
+            <img src=https://avatars.githubusercontent.com/u/122102?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=David Graham/>
+            <br />
+            <sub style="font-size:14px"><b>David Graham</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/calebpeterson>
+            <img src=https://avatars.githubusercontent.com/u/18555288?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Caleb Peterson/>
+            <br />
+            <sub style="font-size:14px"><b>Caleb Peterson</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/ashokdelphia>
+            <img src=https://avatars.githubusercontent.com/u/48444234?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Ashok Argent-Katwala/>
+            <br />
+            <sub style="font-size:14px"><b>Ashok Argent-Katwala</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/amir-arad>
+            <img src=https://avatars.githubusercontent.com/u/6019373?v=4 width="100;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Amir Arad/>
+            <br />
+            <sub style="font-size:14px"><b>Amir Arad</b></sub>
         </a>
     </td>
 </tr>

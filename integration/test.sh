@@ -83,7 +83,7 @@ if ! ts-prune -p $(pwd)/tsconfig.json > /dev/null; then
 fi
 
 step "Cleanup"
-rm ../../package-lock.json # remnants of the npm link
+rm ../../package-lock.json || true # remnants of the npm link (if exists)
 rm outfile # generated outfile
 rm outfile_unusedInModules # generated outfile
 

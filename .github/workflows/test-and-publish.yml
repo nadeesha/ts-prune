@@ -1,4 +1,4 @@
-name: Test and Publish
+name: Test
 
 on:
   push:
@@ -17,16 +17,10 @@ jobs:
         with:
           node-version: "12"
       - name: Install dependencies
-        run: yarn install
+        run: npm ci
       - name: Build typescript
-        run: yarn build
+        run: npm run build
       - name: Unit tests
-        run: yarn test
+        run: npm test
       - name: Integration tests
-        run: yarn test:integration
-      - name: Publish to NPM
-        if: github.ref == 'refs/heads/master'
-        run: yarn semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        run: npm run test:integration

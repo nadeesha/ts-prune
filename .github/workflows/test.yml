@@ -15,10 +15,10 @@ jobs:
         with:
           node-version: "12"
       - name: Install dependencies
-        run: yarn install
+        run: npm ci
       - name: Build typescript
-        run: yarn build
+        run: npm run build
       - name: Unit tests
-        run: yarn test
+        run: npm test
       - name: Integration tests
-        run: yarn test:integration
+        run: npm run test:integration

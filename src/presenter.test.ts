@@ -1,14 +1,6 @@
 import { present, USED_IN_MODULE } from "./presenter";
 import { State } from "./state";
 import { AnalysisResultTypeEnum } from "./analyzer";
-import chalk from "chalk";
-
-jest.mock("chalk", () => ({
-  green: jest.fn((str) => `GREEN(${str})`),
-  yellow: jest.fn((str) => `YELLOW(${str})`),
-  cyan: jest.fn((str) => `CYAN(${str})`),
-  grey: jest.fn((str) => `GREY(${str})`)
-}));
 
 describe("presenter", () => {
   let mockState: jest.Mocked<State>;
@@ -44,8 +36,8 @@ describe("presenter", () => {
       const result = present(mockState);
 
       expect(result).toEqual([
-        "GREEN(src/utils.ts):YELLOW(10) - CYAN(unusedFunction)",
-        "GREEN(src/utils.ts):YELLOW(15) - CYAN(unusedVar)"
+        "src/utils.ts:10 - unusedFunction",
+        "src/utils.ts:15 - unusedVar"
       ]);
     });
 
@@ -64,8 +56,8 @@ describe("presenter", () => {
       const result = present(mockState);
 
       expect(result).toEqual([
-        "GREEN(src/utils.ts):YELLOW(5) - CYAN(locallyUsed)GREY( (used in module))",
-        "GREEN(src/utils.ts):YELLOW(10) - CYAN(notUsed)"
+        "src/utils.ts:5 - locallyUsed (used in module)",
+        "src/utils.ts:10 - notUsed"
       ]);
     });
 
@@ -83,7 +75,7 @@ describe("presenter", () => {
       const result = present(mockState);
 
       expect(result).toEqual([
-        "GREEN(src/components/Button.ts):YELLOW(1) - CYAN(ButtonProps)"
+        "src/components/Button.ts:1 - ButtonProps"
       ]);
     });
 
@@ -108,8 +100,8 @@ describe("presenter", () => {
       const result = present(mockState);
 
       expect(result).toEqual([
-        "GREEN(src/utils.ts):YELLOW(5) - CYAN(util1)",
-        "GREEN(src/types.ts):YELLOW(2) - CYAN(UnusedType)"
+        "src/utils.ts:5 - util1",
+        "src/types.ts:2 - UnusedType"
       ]);
     });
 
@@ -149,7 +141,7 @@ describe("presenter", () => {
       const result = present(mockState);
 
       expect(result).toEqual([
-        "GREEN(other/src/utils.ts):YELLOW(1) - CYAN(externalUtil)"
+        "other/src/utils.ts:1 - externalUtil"
       ]);
     });
 
@@ -167,11 +159,11 @@ describe("presenter", () => {
       const result = present(mockState);
 
       expect(result).toEqual([
-        "GREEN(utils.ts):YELLOW(1) - CYAN(rootUtil)"
+        "utils.ts:1 - rootUtil"
       ]);
     });
 
-    it("should call chalk formatting functions correctly", () => {
+    it("should format output without color codes", () => {
       mockState.definitelyUnused.mockReturnValue([
         {
           file: "/project/src/test.ts",
@@ -182,12 +174,11 @@ describe("presenter", () => {
         }
       ]);
 
-      present(mockState);
+      const result = present(mockState);
 
-      expect(chalk.green).toHaveBeenCalledWith("src/test.ts");
-      expect(chalk.yellow).toHaveBeenCalledWith(42);
-      expect(chalk.cyan).toHaveBeenCalledWith("testFunction");
-      expect(chalk.grey).toHaveBeenCalledWith(USED_IN_MODULE);
+      expect(result).toEqual([
+        "src/test.ts:42 - testFunction (used in module)"
+      ]);
     });
 
     it("should flatten results from multiple files correctly", () => {

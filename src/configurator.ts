@@ -1,6 +1,6 @@
 import { cosmiconfigSync } from "cosmiconfig";
 import program from "commander";
-import pick from "lodash/fp/pick";
+import { pick } from "./utils/common";
 
 export interface IConfigInterface {
   project?: string;
@@ -16,34 +16,45 @@ const defaultConfig: IConfigInterface = {
   error: undefined,
   skip: undefined,
   unusedInModule: undefined,
-}
+};
 
 const onlyKnownConfigOptions = pick(Object.keys(defaultConfig));
 
-
 export const getConfig = () => {
-  const cliConfig = onlyKnownConfigOptions(program
-    .allowUnknownOption() // required for tests passing in unknown options (ex: https://github.com/nadeesha/ts-prune/runs/1125728070)
-    .option('-p, --project [project]', 'TS project configuration file (tsconfig.json)', 'tsconfig.json')
-    .option('-i, --ignore [regexp]', 'Path ignore RegExp pattern')
-    .option('-e, --error', 'Return error code if unused exports are found')
-    .option('-s, --skip [regexp]', 'skip these files when determining whether code is used')
-    .option('-u, --unusedInModule', 'Skip files that are used in module (marked as `used in module`)')
-    .parse(process.argv))
+  const cliConfig = onlyKnownConfigOptions(
+    program
+      .allowUnknownOption() // required for tests passing in unknown options (ex: https://github.com/nadeesha/ts-prune/runs/1125728070)
+      .option(
+        "-p, --project [project]",
+        "TS project configuration file (tsconfig.json)",
+        "tsconfig.json"
+      )
+      .option("-i, --ignore [regexp]", "Path ignore RegExp pattern")
+      .option("-e, --error", "Return error code if unused exports are found")
+      .option(
+        "-s, --skip [regexp]",
+        "skip these files when determining whether code is used"
+      )
+      .option(
+        "-u, --unusedInModule",
+        "Skip files that are used in module (marked as `used in module`)"
+      )
+      .parse(process.argv)
+  );
 
   const defaultConfig = {
-    project: "tsconfig.json"
-  }
+    project: "tsconfig.json",
+  };
 
-  const moduleName = 'ts-prune';
+  const moduleName = "ts-prune";
   const explorerSync = cosmiconfigSync(moduleName);
   const fileConfig = explorerSync.search()?.config;
 
   const config: IConfigInterface = {
     ...defaultConfig,
     ...fileConfig,
-    ...cliConfig
+    ...cliConfig,
   };
 
   return config;
-}
+};

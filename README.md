@@ -1,170 +1,240 @@
-![Build](https://img.shields.io/github/workflow/status/nadeesha/ts-prune/Run%20CI%20Pipeline) ![npm](https://img.shields.io/npm/dm/ts-prune) ![GitHub issues](https://img.shields.io/github/issues-raw/nadeesha/ts-prune)
-
-# 🚨 ts-prune is going into maintanence mode
-
-Please use [knip](https://github.com/webpro/knip) which carries on the spirit.
-
-<details>
-<summary>More details</summary>
-
-I started ts-prune to find a sustainable way to detect unused exports in Typescript code. Due to the absence of native APIs that enable this, the best way forward was to consolidate a few hacks together that did this semi-elegantly for _most_ usecases.
-
-However, due to the popularity of ts-prune, it has absorbed more use cases, and complexity has bloated to the point that I'm no longer comfortable to add more features or do any other changes to the core system.
-
-The most important thing for ts-prune is to be backwards compatible and reliable for existing use cases.
-
-## What will happen
-
-- Critical bug fixes
-- Patching vulnerabilities in third party code
-
-## What will not happen
-
-- Entertaining feature requests
-- Accepting PRs for net new features of refactors
-
-## Notes for the future
-
-- This is a feature Typescript should support natively, and each "hack" has a bunch of trade-offs.
-- Due to the sheer fragmentation of TS/JS ecosystem between frameworks, package managers etc a non-native solution will result in complexity bloat.
-- At this point, the maintainer has two choices
-  1. Aggresively defend against feature requests, changes and anger the open-source community
-  2. Accept complexity bloat, and dedicate time and energy for compaction
-  
-</details>
-
 # ts-prune
 
-Find potentially unused exports in your Typescript project with zero configuration.
+[![npm](https://img.shields.io/npm/v/ts-prune)](https://www.npmjs.com/package/ts-prune) [![npm](https://img.shields.io/npm/dm/ts-prune)](https://www.npmjs.com/package/ts-prune) [![GitHub issues](https://img.shields.io/github/issues/nadeesha/ts-prune)](https://github.com/nadeesha/ts-prune/issues)
 
-[![asciicast](https://asciinema.org/a/liQKNmkGkedCnyHuJzzgu7uDI.svg)](https://asciinema.org/a/liQKNmkGkedCnyHuJzzgu7uDI) [![Join the chat at https://gitter.im/ts-prune/community](https://badges.gitter.im/ts-prune/community.svg)](https://gitter.im/ts-prune/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+**Find potentially unused exports in your TypeScript project with zero configuration.**
 
-## Getting Started
+## 📢 Maintenance Notice
 
-`ts-prune` exposes a cli that reads your tsconfig file and prints out all the unused exports in your source files.
+> **ts-prune is now in maintenance mode** - For new projects, we recommend [knip](https://github.com/webpro/knip) which carries forward the same mission with more features.
 
-### Installing
+ts-prune will continue to receive:
+- ✅ Critical bug fixes
+- ✅ Security updates
+- ✅ Dependency maintenance
 
-Install ts-prune with yarn or npm
+We will **not** be adding new features or accepting feature PRs. The tool remains stable and production-ready for existing users.
 
-```sh
+## What is ts-prune?
+
+ts-prune is a simple, fast tool that finds exported TypeScript/JavaScript code that isn't being used anywhere in your project. It helps you:
+
+- 🧹 **Clean up dead code** - Remove exports that serve no purpose
+- 📦 **Reduce bundle size** - Eliminate unused code from your builds  
+- 🔍 **Improve code quality** - Keep your codebase lean and maintainable
+- ⚡ **Zero configuration** - Works out of the box with any TypeScript project
+
+## Quick Start
+
+### Installation
+
+```bash
 # npm
-npm install ts-prune --save-dev
-# yarn
-yarn add -D ts-prune
+npm install --save-dev ts-prune
+
+# yarn  
+yarn add --dev ts-prune
+
+# pnpm
+pnpm add --save-dev ts-prune
 ```
 
-### Usage
+### Basic Usage
 
-You can install it in your project and alias it to a npm script in package.json.
+```bash
+# Run in your project root
+npx ts-prune
+```
+
+**Example output:**
+```
+src/components/Button.ts:15 - ButtonVariant
+src/utils/helpers.ts:8 - formatCurrency  
+src/types/user.ts:12 - UserRole
+src/api/client.ts:45 - ApiResponse
+```
+
+Each line shows: `file:line - exportName`
+
+## Examples
+
+### Example 1: Finding Unused Exports
+
+Given these files:
+
+```typescript
+// src/utils/math.ts
+export const add = (a: number, b: number) => a + b;
+export const subtract = (a: number, b: number) => a - b;  // unused
+export const multiply = (a: number, b: number) => a * b;  // unused
+
+// src/app.ts  
+import { add } from './utils/math';
+console.log(add(2, 3));
+```
+
+Running `ts-prune` outputs:
+```
+src/utils/math.ts:2 - subtract
+src/utils/math.ts:3 - multiply
+```
+
+### Example 2: Ignoring Specific Exports
+
+Use `// ts-prune-ignore-next` to ignore specific exports:
+
+```typescript
+// src/api/types.ts
+export interface User {
+  id: string;
+  name: string;
+}
+
+// ts-prune-ignore-next
+export interface AdminUser extends User {  // ignored by ts-prune
+  permissions: string[];
+}
+
+export interface Customer {  // will be flagged if unused
+  customerId: string;
+}
+```
+
+### Example 3: Working with Different File Types
+
+ts-prune works with various TypeScript patterns:
+
+```typescript
+// Default exports
+export default class MyClass {}
+
+// Named exports  
+export const myFunction = () => {};
+export type MyType = string;
+export interface MyInterface {}
+
+// Re-exports
+export { SomethingElse } from './other-file';
+export * from './barrel-file';
+```
+
+## Configuration
+
+### CLI Options
+
+```bash
+ts-prune [options]
+```
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `-p, --project` | Path to tsconfig.json | `ts-prune -p tsconfig.build.json` |
+| `-i, --ignore` | Ignore pattern (RegExp) | `ts-prune -i "test\|spec"` |
+| `-s, --skip` | Skip files pattern | `ts-prune -s "\.test\.ts$"` |
+| `-e, --error` | Exit with error code if unused exports found | `ts-prune -e` |
+| `-u, --unusedInModule` | Skip exports marked as "used in module" | `ts-prune -u` |
+
+### Configuration File
+
+Create `.ts-prunerc` (JSON), `.ts-prunerc.js`, or add to `package.json`:
 
 ```json
 {
+  "ignore": "components/(Button|Input)",
+  "skip": "\\.test\\.|test/",
+  "project": "tsconfig.build.json"
+}
+```
+
+## Common Use Cases
+
+### 1. CI/CD Integration
+
+Add to your package.json:
+```json
+{
   "scripts": {
-    "find-deadcode": "ts-prune"
+    "deadcode": "ts-prune",
+    "deadcode:ci": "ts-prune --error"
   }
 }
 ```
 
-If you want to run against different Typescript configuration than tsconfig.json:
-
-```sh
-ts-prune -p tsconfig.dev.json
-```
-
-### Examples
-
-- [gatsby-material-starter](https://github.com/Vagr9K/gatsby-material-starter/blob/bdeba4160319c1977c83ee90e035c7fe1bd1854c/themes/material/package.json#L147)
-- [DestinyItemManager](https://github.com/DestinyItemManager/DIM/blob/aeb43dd848b5137656e6f47812189a2beb970089/package.json#L26)
-
-### Configuration
-
-ts-prune supports CLI and file configuration via [cosmiconfig](https://github.com/davidtheclark/cosmiconfig#usage) (all file formats are supported).
-
-#### Configuration options
-
-- `-p, --project` - __tsconfig.json__ path(`tsconfig.json` by default)
-- `-i, --ignore` - errors ignore RegExp pattern
-- `-e, --error` - return error code if unused exports are found
-- `-s, --skip` - skip these files when determining whether code is used. (For example, `.test.ts?` will stop ts-prune from considering an export in test file usages)
-- `-u, --unusedInModule` - skip files that are used in module (marked as `used in module`)
-
-CLI configuration options:
-
-```bash
-ts-prune -p my-tsconfig.json -i my-component-ignore-patterns?
-```
-
-Configuration file example `.ts-prunerc`: 
+### 2. Pre-commit Hook
 
 ```json
 {
-  "ignore": "my-component-ignore-patterns?"
+  "husky": {
+    "hooks": {
+      "pre-commit": "ts-prune --error"
+    }
+  }
 }
 ```
 
-### FAQ
+### 3. Count Unused Exports
 
-#### How do I get the count of unused exports?
-
-```sh
+```bash
 ts-prune | wc -l
 ```
 
-#### How do I ignore a specific path?
+### 4. Filter Results
 
-You can either,
+```bash
+# Ignore test files
+ts-prune | grep -v "\.test\."
 
-##### 1. Use the `-i, --ignore` configuration option:
+# Only show specific directories  
+ts-prune | grep "src/components"
 
-```sh
-ts-prune --ignore 'src/ignore-this-path'
+# Ignore multiple patterns
+ts-prune | grep -v -E "(test|spec|stories)"
 ```
 
-##### 2. Use `grep -v` to filter the output:
+## Understanding the Output
 
-```sh
-ts-prune | grep -v src/ignore-this-path
+ts-prune categorizes exports into different types:
+
+- **Regular unused export**: `src/file.ts:10 - exportName`
+- **Used in module**: `src/file.ts:5 - localHelper (used in module)` 
+  - Export is only used within the same file
+  - Use `-u` flag to ignore these
+
+## Limitations
+
+- **Dynamic imports**: `import('./dynamic-file')` usage might not be detected
+- **String-based imports**: `require('module-name')` patterns
+- **Framework magic**: Some frameworks use exports through reflection
+- **Configuration files**: Exports in config files might appear unused
+
+For these cases, use `// ts-prune-ignore-next` or configure ignore patterns.
+
+## FAQ
+
+### How accurate is ts-prune?
+
+ts-prune is conservative and may show false positives for:
+- Dynamically imported modules
+- Framework-specific patterns (Angular services, React lazy loading)
+- Build tool configurations
+
+### Can I use this with JavaScript?
+
+Yes! ts-prune works with `.js` files in TypeScript projects. Ensure your `tsconfig.json` includes JavaScript files:
+
+```json
+{
+  "compilerOptions": {
+    "allowJs": true
+  }
+}
 ```
 
-#### How do I ignore multiple paths?
+## Acknowledgements
 
-You can either,
+Built with the excellent [ts-morph](https://github.com/dsherret/ts-morph) library and inspired by [this approach](https://gist.github.com/dsherret/0bae87310ce24866ae22425af80a9864) by [@dsherret](https://github.com/dsherret).
 
-##### 1. Use the `-i, --ignore` configuration option:
-
-```sh
-ts-prune --ignore 'src/ignore-this-path|src/also-ignore-this-path'
-```
-
-##### 2. Use multiple `grep -v` to filter the output:
-
-```sh
-ts-prune | grep -v src/ignore-this-path | grep -v src/also-ignore-this-path
-```
-
-#### How do I ignore a specific identifier?
-
-You can either,
-
-##### 1. Prefix the export with `// ts-prune-ignore-next`
-
-```ts
-// ts-prune-ignore-next
-export const thisNeedsIgnoring = foo;
-```
-
-##### 2. Use `grep -v` to ignore a more widely used export name
-
-```sh
-ts-prune | grep -v ignoreThisThroughoutMyCodebase
-```
-
-### Acknowledgements
-
-- The excellent [ts-morph](https://github.com/dsherret/ts-morph) library. And [this gist](https://gist.github.com/dsherret/0bae87310ce24866ae22425af80a9864) by [@dsherret](https://github.com/dsherret).
-
-### Contributors
+## Contributors
 
 <table>
 <tr>

@@ -31,8 +31,10 @@ After a clean `npm ci`, `npm run check` passed on macOS with Node 22.23.2, 24.21
 
 `npm run test:coverage` also passed all 256 tests on Node 26, reporting 98.84% line, 92.37% branch, and 98.81% function coverage for compiled source exercised by test workers. CLI subprocess behavior is verified by integration tests separately.
 
+The manual release workflow adds 12 regression tests for tag resolution, package/version checks, invalid input, and matching the workflow commit for npm provenance. The expanded 268-test suite passes `npm run check` on Node 26, and actionlint validates the workflow definitions.
+
 CI is configured for Node 22/24/26 on Linux and Node 26 on macOS and Windows. Linux and Windows jobs have not been executed locally. Node runtimes used for local verification were checksum-verified official binaries in a temporary directory; the machine-wide Node installation was unchanged.
 
 The npm package smoke test builds a tarball, installs only its production dependencies into a temporary consumer, and verifies the executable shim, help, output, error exit code, CommonJS API, and published TypeScript declarations. Packaging excludes tests and source files. The test and packaging commands never globally link the package or delete its lockfile.
 
-See the development commands in README.md and the updated local release process in PUBLISHING.md. Release status is tracked by version tags and the Test GitHub Actions workflow.
+See the development commands in README.md and the updated local release process in PUBLISHING.md. The Test workflow validates changes automatically; the separate Release workflow publishes an existing version tag only when manually started. Release validation pins the tested commit and rejects invalid tags, version mismatches, and other package names.

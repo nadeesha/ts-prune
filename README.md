@@ -168,7 +168,7 @@ npm run lint:fix        # apply lint fixes
 
 Tests use `node:test` and `node:assert/strict`. Test compilation goes into `.test-build/`; the published CLI and CommonJS library are built into `lib/`. Integration tests run in temporary directories without global npm links. Coverage measures compiled source in test workers; CLI subprocess behavior is checked separately. The package smoke test installs production dependencies from npm into a temporary consumer project.
 
-Development uses Node 26. CI tests Node 22, 24, and 26 on Linux and Node 26 on macOS and Windows. It runs on pull requests, pushes to `master` and `codex/**`, and version tags. Tagged releases publish only after the full matrix passes; see [PUBLISHING.md](PUBLISHING.md).
+Development uses Node 26. CI tests Node 22, 24, and 26 on Linux and Node 26 on macOS and Windows. It runs on pull requests, pushes to `master` and `codex/**`, and version tags. Publishing is manual: choose **Actions → Release → Run workflow** and enter an existing version tag. The release reruns the full matrix before publishing; pushes and tags alone do not publish. See [PUBLISHING.md](PUBLISHING.md) for setup and release steps.
 
 The build uses TypeScript 6.0.3 while the TypeScript ESLint parser requires a compiler version below 6.1. TypeScript 7 is deferred until the parser supports it. The analyzer uses the compiler bundled with ts-morph independently. Runtime dependencies are ts-morph and cosmiconfig. See [MODERNIZATION.md](MODERNIZATION.md) for dependency counts and verification results.
 

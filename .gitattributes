@@ -1,0 +1,2 @@
+# Keep source, executable scripts, and golden output fixtures consistent on all platforms.
+* text=auto eol=lf

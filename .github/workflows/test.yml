@@ -3,25 +3,67 @@ name: Test
 on:
   pull_request:
   push:
-    branches:
-      - master
+    branches: [master, "codex/**"]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
-    name: test
-    runs-on: ubuntu-latest
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: [22, 24, 26]
+        include:
+          - os: macos-latest
+            node: 26
+          - os: windows-latest
+            node: 26
     steps:
-      - name: Git Checkout
-        uses: actions/checkout@v4
-      - name: Setup node version
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
         with:
-          node-version: "20"
-      - name: Install dependencies
-        run: npm ci
-      - name: Build typescript
-        run: npm run build
-      - name: Unit tests
-        run: npm test
-      - name: Integration tests
-        run: npm run test:integration
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run test:package
+      - name: Coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 26
+        run: npm run test:coverage
+      - name: Audit production dependencies
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 26
+        run: npm audit --omit=dev
+
+  publish:
+    name: Publish tagged release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 26
+          registry-url: https://registry.npmjs.org
+      - name: Verify release tag matches package version
+        run: node -e 'if (process.env.GITHUB_REF_NAME !== "v" + require("./package.json").version) throw new Error("Release tag must match package.json version")'
+      - run: npm ci
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.NPM_AUTH_TOKEN }}
+      - name: Create GitHub release
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --title "ts-prune $GITHUB_REF_NAME" --notes-file RELEASE_NOTES.md
+        env:
+          GH_TOKEN: ${{ github.token }}

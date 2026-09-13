@@ -1,0 +1,573 @@
+{
+  "source": "Commander 6.2.1; fresh Command matching ts-prune options; captured before replacement",
+  "scenarios": [
+    {
+      "args": [],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-p",
+        "custom.json",
+        "-i",
+        "test",
+        "-e",
+        "-s",
+        "spec",
+        "-u"
+      ],
+      "config": {
+        "project": "custom.json",
+        "ignore": "test",
+        "error": true,
+        "skip": "spec",
+        "unusedInModule": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--project=custom.json",
+        "--ignore=test",
+        "--skip=spec"
+      ],
+      "config": {
+        "project": "custom.json",
+        "ignore": "test",
+        "skip": "spec"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-pconfig.json",
+        "-ipattern",
+        "-sspec"
+      ],
+      "config": {
+        "project": "config.json",
+        "ignore": "pattern",
+        "skip": "spec"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-eu"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "error": true,
+        "unusedInModule": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-eupfoo.json"
+      ],
+      "config": {
+        "project": "foo.json",
+        "error": true,
+        "unusedInModule": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-p"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-i"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "ignore": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-s"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "skip": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-p",
+        "--error"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "error": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-i",
+        "-"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "ignore": "-"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-i",
+        ""
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "ignore": ""
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-p",
+        "one",
+        "-p",
+        "two"
+      ],
+      "config": {
+        "project": "two"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-p",
+        "one",
+        "-p"
+      ],
+      "config": {
+        "project": "one"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--project="
+      ],
+      "config": {
+        "project": ""
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--error=false"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--unusedInModule=false"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--unknown",
+        "value",
+        "-e"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "error": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-xepfoo"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-exu"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "error": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--",
+        "-e",
+        "-p",
+        "ignored"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "file.ts",
+        "-e"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "error": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-h"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "Usage: ts-prune [options]\n\nOptions:\n  -p, --project [project]  TS project configuration file (tsconfig.json)\n                           (default: \"tsconfig.json\")\n  -i, --ignore [regexp]    Path ignore RegExp pattern\n  -e, --error              Return error code if unused exports are found\n  -s, --skip [regexp]      skip these files when determining whether code is\n                           used\n  -u, --unusedInModule     Skip files that are used in module (marked as `used\n                           in module`)\n  -h, --help               display help for command\n",
+      "stderr": "",
+      "exitCode": 0
+    },
+    {
+      "args": [
+        "--help"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "Usage: ts-prune [options]\n\nOptions:\n  -p, --project [project]  TS project configuration file (tsconfig.json)\n                           (default: \"tsconfig.json\")\n  -i, --ignore [regexp]    Path ignore RegExp pattern\n  -e, --error              Return error code if unused exports are found\n  -s, --skip [regexp]      skip these files when determining whether code is\n                           used\n  -u, --unusedInModule     Skip files that are used in module (marked as `used\n                           in module`)\n  -h, --help               display help for command\n",
+      "stderr": "",
+      "exitCode": 0
+    },
+    {
+      "args": [
+        "--help=true"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-eh"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "error": true
+      },
+      "stdout": "Usage: ts-prune [options]\n\nOptions:\n  -p, --project [project]  TS project configuration file (tsconfig.json)\n                           (default: \"tsconfig.json\")\n  -i, --ignore [regexp]    Path ignore RegExp pattern\n  -e, --error              Return error code if unused exports are found\n  -s, --skip [regexp]      skip these files when determining whether code is\n                           used\n  -u, --unusedInModule     Skip files that are used in module (marked as `used\n                           in module`)\n  -h, --help               display help for command\n",
+      "stderr": "",
+      "exitCode": 0
+    },
+    {
+      "args": [
+        "-he"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-ph"
+      ],
+      "config": {
+        "project": "h"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-p=h"
+      ],
+      "config": {
+        "project": "=h"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--project",
+        "-3"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--project=-3"
+      ],
+      "config": {
+        "project": "-3"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--ERROR"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--project",
+        "--",
+        "-e"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--no-error"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--skip",
+        "--unknown",
+        "value",
+        "-u"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "skip": true,
+        "unusedInModule": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-i",
+        "one",
+        "-i"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "ignore": "one"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-s",
+        "one",
+        "-s"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "skip": "one"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "-i",
+        "-i",
+        "two"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "ignore": "two"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--help",
+        "-p",
+        "custom.json"
+      ],
+      "config": {
+        "project": "custom.json"
+      },
+      "stdout": "Usage: ts-prune [options]\n\nOptions:\n  -p, --project [project]  TS project configuration file (tsconfig.json)\n                           (default: \"tsconfig.json\")\n  -i, --ignore [regexp]    Path ignore RegExp pattern\n  -e, --error              Return error code if unused exports are found\n  -s, --skip [regexp]      skip these files when determining whether code is\n                           used\n  -u, --unusedInModule     Skip files that are used in module (marked as `used\n                           in module`)\n  -h, --help               display help for command\n",
+      "stderr": "",
+      "exitCode": 0
+    },
+    {
+      "args": [
+        "--",
+        "--help"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--unknown",
+        "--",
+        "--help"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "Usage: ts-prune [options]\n\nOptions:\n  -p, --project [project]  TS project configuration file (tsconfig.json)\n                           (default: \"tsconfig.json\")\n  -i, --ignore [regexp]    Path ignore RegExp pattern\n  -e, --error              Return error code if unused exports are found\n  -s, --skip [regexp]      skip these files when determining whether code is\n                           used\n  -u, --unusedInModule     Skip files that are used in module (marked as `used\n                           in module`)\n  -h, --help               display help for command\n",
+      "stderr": "",
+      "exitCode": 0
+    },
+    {
+      "args": [
+        "--unknown",
+        "--",
+        "-e"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--help",
+        "--",
+        "-e"
+      ],
+      "config": {
+        "project": "tsconfig.json"
+      },
+      "stdout": "Usage: ts-prune [options]\n\nOptions:\n  -p, --project [project]  TS project configuration file (tsconfig.json)\n                           (default: \"tsconfig.json\")\n  -i, --ignore [regexp]    Path ignore RegExp pattern\n  -e, --error              Return error code if unused exports are found\n  -s, --skip [regexp]      skip these files when determining whether code is\n                           used\n  -u, --unusedInModule     Skip files that are used in module (marked as `used\n                           in module`)\n  -h, --help               display help for command\n",
+      "stderr": "",
+      "exitCode": 0
+    },
+    {
+      "args": [
+        "-e",
+        "-e"
+      ],
+      "config": {
+        "project": "tsconfig.json",
+        "error": true
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    },
+    {
+      "args": [
+        "--project",
+        "--project=last.json"
+      ],
+      "config": {
+        "project": "last.json"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exitCode": null
+    }
+  ]
+}

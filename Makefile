@@ -1,4 +1,4 @@
-.PHONY: build test publish publish-dry clean check-auth
+.PHONY: build test publish publish-dry clean check-auth prepare-publish check-github check-npm check-tokens
 
 # Build the project
 build:
@@ -6,15 +6,15 @@ build:
 
 # Run tests
 test:
-	npm test
-	npm run test:integration
+	npm run check
 
 # Clean build artifacts
 clean:
 	rm -rf lib/
 
 # Prepare for publishing
-prepare-publish: clean test build
+prepare-publish: clean test
+	npm run test:package
 	@echo "Project built and tested successfully"
 
 # Dry run to see what would be released (analyze commits without publishing)

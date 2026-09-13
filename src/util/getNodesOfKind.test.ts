@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
 import { Project, ts } from "ts-morph";
 import { getNodesOfKind } from "./getNodesOfKind";
 
@@ -21,12 +23,10 @@ type ABC = foo.ABC;
 `;
 
 test("should get nodes of a kind", () => {
-  const project = new Project();
+  const project = new Project({ useInMemoryFileSystem: true });
   const star = project.createSourceFile("/project/star.ts", starImportSrc);
 
-  expect(
-    getNodesOfKind(star, ts.SyntaxKind.PropertyAccessExpression).map((n) =>
+  assert.deepEqual(getNodesOfKind(star, ts.SyntaxKind.PropertyAccessExpression).map((n) =>
       n.getText()
-    )
-  ).toEqual(["foo.x", "foo.y"]);
+    ), ["foo.x", "foo.y"]);
 });

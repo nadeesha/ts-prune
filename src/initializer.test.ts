@@ -1,89 +1,54 @@
+import assert from "node:assert/strict";
+import { afterEach, beforeEach, describe, it } from "node:test";
+import { join, relative } from "node:path";
 import { Project } from "ts-morph";
+import { createProjectFixture } from "../test/project-fixture";
 import { initialize } from "./initializer";
 
-jest.mock("ts-morph");
-
-const MockProject = Project as jest.MockedClass<typeof Project>;
-
 describe("initializer", () => {
+  let fixture: ReturnType<typeof createProjectFixture>;
   beforeEach(() => {
-    jest.clearAllMocks();
+    fixture = createProjectFixture({ "src/api.ts": "export const value = 1;" });
+  });
+  afterEach(() => fixture.cleanup());
+
+  it("creates a real Project from the provided absolute tsconfig path", () => {
+    const { project } = initialize(fixture.project);
+    assert.ok(project instanceof Project);
+    assert.deepEqual(project.getSourceFiles().map(file => file.getBaseName()), ["api.ts"]);
+    assert.equal(project.getCompilerOptions().noLib, true);
   });
 
-  describe("initialize", () => {
-    it("should create a Project with the provided tsconfig path", () => {
-      const tsConfigPath = "/project/tsconfig.json";
-      const mockProject = new MockProject();
-      MockProject.mockImplementation(() => mockProject);
+  it("handles relative tsconfig paths", () => {
+    const { project } = initialize(relative(process.cwd(), fixture.project));
+    assert.equal(project.getSourceFileOrThrow("api.ts").getExportSymbols()[0]?.getName(), "value");
+  });
 
-      const result = initialize(tsConfigPath);
+  it("handles custom tsconfig filenames", () => {
+    fixture.write({ "tsconfig.build.json": '{ "include": ["src/**/*.ts"] }' });
+    const { project } = initialize(join(fixture.directory, "tsconfig.build.json"));
+    assert.equal(project.getSourceFiles().length, 1);
+  });
 
-      expect(MockProject).toHaveBeenCalledWith({
-        tsConfigFilePath: tsConfigPath
-      });
-      expect(result.project).toBe(mockProject);
-    });
+  it("returns an object containing the project", () => {
+    const result = initialize(fixture.project);
+    assert.deepEqual(Object.keys(result), ["project"]);
+    assert.ok(result.project instanceof Project);
+  });
 
-    it("should handle relative tsconfig paths", () => {
-      const tsConfigPath = "./tsconfig.json";
-      const mockProject = new MockProject();
-      MockProject.mockImplementation(() => mockProject);
+  it("propagates errors from missing project files", () => {
+    assert.throws(() => initialize(join(fixture.directory, "missing.json")), /missing\.json/);
+  });
 
-      const result = initialize(tsConfigPath);
+  it("handles paths with spaces and special characters", () => {
+    fixture.write({ "my-app #1/tsconfig.json": '{ "include": ["../src/**/*.ts"] }' });
+    const { project } = initialize(join(fixture.directory, "my-app #1/tsconfig.json"));
+    assert.equal(project.getSourceFiles().length, 1);
+  });
 
-      expect(MockProject).toHaveBeenCalledWith({
-        tsConfigFilePath: tsConfigPath
-      });
-      expect(result.project).toBe(mockProject);
-    });
-
-    it("should handle custom tsconfig filenames", () => {
-      const tsConfigPath = "/project/tsconfig.build.json";
-      const mockProject = new MockProject();
-      MockProject.mockImplementation(() => mockProject);
-
-      const result = initialize(tsConfigPath);
-
-      expect(MockProject).toHaveBeenCalledWith({
-        tsConfigFilePath: tsConfigPath
-      });
-      expect(result.project).toBe(mockProject);
-    });
-
-    it("should return an object with the project property", () => {
-      const tsConfigPath = "/project/tsconfig.json";
-      const mockProject = new MockProject();
-      MockProject.mockImplementation(() => mockProject);
-
-      const result = initialize(tsConfigPath);
-
-      expect(result).toEqual({
-        project: expect.any(MockProject)
-      });
-    });
-
-    it("should handle absolute paths", () => {
-      const tsConfigPath = "/absolute/path/to/tsconfig.json";
-      const mockProject = new MockProject();
-      MockProject.mockImplementation(() => mockProject);
-
-      initialize(tsConfigPath);
-
-      expect(MockProject).toHaveBeenCalledWith({
-        tsConfigFilePath: tsConfigPath
-      });
-    });
-
-    it("should handle paths with special characters", () => {
-      const tsConfigPath = "/project/my-app/tsconfig.json";
-      const mockProject = new MockProject();
-      MockProject.mockImplementation(() => mockProject);
-
-      initialize(tsConfigPath);
-
-      expect(MockProject).toHaveBeenCalledWith({
-        tsConfigFilePath: tsConfigPath
-      });
-    });
+  it("creates an independent project for each call", () => {
+    const first = initialize(fixture.project).project;
+    const second = initialize(fixture.project).project;
+    assert.notEqual(first, second);
   });
 });

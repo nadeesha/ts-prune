@@ -1,69 +1,139 @@
-import { execSync } from "child_process";
-import { join } from "path";
-import { writeFileSync, mkdirSync, existsSync, rmdirSync, unlinkSync, readdirSync, statSync } from "fs";
-
-// Polyfill for rmSync for older Node versions
-const rmSync = (path: string, options?: { recursive?: boolean; force?: boolean }) => {
-  if (!existsSync(path)) return;
-
-  const stats = statSync(path);
-  if (stats.isDirectory()) {
-    const files = readdirSync(path);
-    files.forEach(file => {
-      const filePath = join(path, file);
-      const fileStats = statSync(filePath);
-      if (fileStats.isDirectory()) {
-        rmSync(filePath, { recursive: true, force: true });
-      } else {
-        unlinkSync(filePath);
-      }
-    });
-    rmdirSync(path);
-  } else {
-    unlinkSync(path);
-  }
-};
+import assert from "node:assert/strict";
+import { afterEach, beforeEach, describe, it } from "node:test";
+import { spawnSync } from "node:child_process";
+import { dirname, join } from "node:path";
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 
 describe("Integration Tests", () => {
-  const testDir = join(__dirname, "../test-temp");
-  const tsPruneCmd = `node ${join(__dirname, "../lib/index.js")}`;
+  let testDir: string;
+  const root = process.cwd();
+  const cliPath = join(root, "lib/index.js");
 
   beforeEach(() => {
-    if (existsSync(testDir)) {
-      rmSync(testDir, { recursive: true, force: true });
-    }
-    mkdirSync(testDir, { recursive: true });
+    testDir = mkdtempSync(join(tmpdir(), "ts-prune test-"));
   });
 
   afterEach(() => {
-    if (existsSync(testDir)) {
-      rmSync(testDir, { recursive: true, force: true });
-    }
+    rmSync(testDir, { recursive: true, force: true });
   });
 
   const createTestProject = (files: Record<string, string>) => {
     Object.entries(files).forEach(([filePath, content]) => {
       const fullPath = join(testDir, filePath);
-      const dir = fullPath.substring(0, fullPath.lastIndexOf("/"));
+      const dir = dirname(fullPath);
       mkdirSync(dir, { recursive: true });
       writeFileSync(fullPath, content);
     });
   };
 
-  const runTsPrune = (args: string = "", cwd: string = testDir): string => {
-    try {
-      return execSync(`${tsPruneCmd} ${args}`, {
-        cwd,
-        encoding: "utf8",
-        stdio: ["pipe", "pipe", "pipe"],
-      }).toString();
-    } catch (error: any) {
-      return error.stdout?.toString() || "";
-    }
+  const invoke = (args: string[] = [], cwd = testDir) => {
+    const result = spawnSync(process.execPath, [cliPath, ...args], {
+      cwd, encoding: "utf8", timeout: 30000,
+    });
+    if (result.error) throw result.error;
+    return result;
   };
 
-  // Skip integration tests that require CLI execution
-  describe.skip("Basic functionality", () => {
+  const runTsPrune = (args: string[] = [], cwd = testDir): string => {
+    const result = invoke(args, cwd);
+    assert.equal(result.stderr, "");
+    assert.equal(result.status, 0);
+    return result.stdout;
+  };
+
+  describe("compatibility contracts", () => {
+    for (const [args, baseline] of [
+      [[], "outfile.base"],
+      [["--unusedInModule"], "outfile_unusedInModules.base"],
+    ] as const) {
+      it(`preserves the legacy fixture output with ${JSON.stringify(args)}`, () => {
+        const output = runTsPrune(["--skip", "skip.me", ...args], join(root, "integration/testproject"));
+        assert.equal(output.replace(/\\/g, "/"), readFileSync(join(root, "integration", baseline), "utf8"));
+      });
+    }
+
+    it("uses files entries as public entrypoints, with comments and trailing commas", () => {
+      createTestProject({
+        "tsconfig.json": '{ // public API\n "files": ["src/api.ts",], "include": ["src/**/*.ts"], }',
+        "src/api.ts": "export const publicApi = 1;",
+        "src/other.ts": "export const unused = 1;",
+      });
+      const output = runTsPrune();
+      assert.ok(output.includes("unused"));
+      assert.ok(!output.includes("publicApi"));
+    });
+
+    for (const config of [
+      "{ 'files': ['src/api.ts'] }",
+      '{ files: ["src/api.ts"] }',
+    ]) {
+      it(`rejects JSON5 syntax rejected by TypeScript: ${config}`, () => {
+        createTestProject({
+          "tsconfig.json": config,
+          "src/api.ts": "export const publicApi = 1;",
+        });
+        const result = invoke();
+        assert.equal(result.status, 1);
+        assert.ok(result.stderr.includes("double quotes expected"));
+      });
+    }
+
+    it("does not turn inherited files entries into public entrypoints", () => {
+      createTestProject({
+        "tsconfig.json": '{ "extends": "./base.json" }',
+        "base.json": '{ "files": ["src/api.ts"] }',
+        "src/api.ts": "export const unused = 1;",
+      });
+      assert.ok(runTsPrune().includes("unused"));
+    });
+
+    it("loads a project path from .ts-prunerc when no CLI override is given", () => {
+      createTestProject({
+        ".ts-prunerc": JSON.stringify({ project: "config/custom.json" }),
+        "config/custom.json": JSON.stringify({ include: ["../src/**/*.ts"] }),
+        "src/api.ts": "export const unused = 1;",
+      });
+      assert.ok(runTsPrune().includes("unused"));
+    });
+
+    it("loads package.json configuration and respects false boolean flags", () => {
+      createTestProject({
+        "package.json": JSON.stringify({ "ts-prune": { unusedInModule: false, error: false } }),
+        "tsconfig.json": JSON.stringify({ include: ["src/**/*.ts"] }),
+        "src/api.ts": "export const local = 1; console.log(local);",
+      });
+      assert.ok(runTsPrune().includes("local (used in module)"));
+    });
+
+    it("prints help without requiring a project", () => {
+      assert.ok(runTsPrune(["--help"]).includes("--unusedInModule"));
+    });
+
+    it("can be imported as a library without running the CLI", () => {
+      const result = spawnSync(process.execPath, ["-e", `const api = require(${JSON.stringify(cliPath)}); console.log(typeof api.run, typeof api.runCli);`], {
+        cwd: testDir, encoding: "utf8",
+      });
+      assert.equal(result.status, 0);
+      assert.equal(result.stderr, "");
+      assert.equal(result.stdout.trim(), "function function");
+    });
+
+    it("keeps the error exit code after output filters", () => {
+      createTestProject({
+        "tsconfig.json": JSON.stringify({ include: ["src/**/*.ts"] }),
+        "src/api.ts": "export const unused = 1;",
+      });
+      assert.equal(runTsPrune(["--error", "--ignore", "unused"]), "");
+    });
+
+    it("rejects malformed tsconfig files", () => {
+      createTestProject({ "tsconfig.json": "{invalid !!!" });
+      assert.equal(invoke().status, 1);
+    });
+  });
+
+  describe("Basic functionality", () => {
     it("should find unused exports in simple project", () => {
       createTestProject({
         "tsconfig.json": JSON.stringify({
@@ -81,8 +151,8 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output).toContain("unused");
-      expect(output).not.toContain("used");
+      assert.ok(output.includes("unused"));
+      assert.doesNotMatch(output, /- used(\s|$)/m);
     });
 
     it("should handle projects with no unused exports", () => {
@@ -101,7 +171,7 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output.trim()).toBe("");
+      assert.equal(output.trim(), "");
     });
 
     it("should detect unused types and interfaces", () => {
@@ -129,14 +199,14 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output).toContain("UnusedInterface");
-      expect(output).toContain("UnusedType");
-      expect(output).not.toContain("UsedInterface");
-      expect(output).not.toContain("UsedType");
+      assert.ok(output.includes("UnusedInterface"));
+      assert.ok(output.includes("UnusedType"));
+      assert.ok(!output.includes("UsedInterface"));
+      assert.ok(!output.includes("UsedType"));
     });
   });
 
-  describe.skip("CLI options", () => {
+  describe("CLI options", () => {
     it("should respect --skip option", () => {
       createTestProject({
         "tsconfig.json": JSON.stringify({
@@ -156,10 +226,10 @@ describe("Integration Tests", () => {
       });
 
       const outputWithoutSkip = runTsPrune();
-      expect(outputWithoutSkip).not.toContain("util");
+      assert.ok(!outputWithoutSkip.includes("util"));
 
-      const outputWithSkip = runTsPrune("--skip \"\\.test\\.\"");
-      expect(outputWithSkip).toContain("util");
+      const outputWithSkip = runTsPrune(["--skip", "\\.test\\."]);
+      assert.ok(outputWithSkip.includes("util"));
     });
 
     it("should respect --ignore option", () => {
@@ -177,12 +247,12 @@ describe("Integration Tests", () => {
       });
 
       const outputWithoutIgnore = runTsPrune();
-      expect(outputWithoutIgnore).toContain("unused");
-      expect(outputWithoutIgnore).toContain("testUnused");
+      assert.ok(outputWithoutIgnore.includes("unused"));
+      assert.ok(outputWithoutIgnore.includes("testUnused"));
 
-      const outputWithIgnore = runTsPrune("--ignore \"test\"");
-      expect(outputWithIgnore).toContain("unused");
-      expect(outputWithIgnore).not.toContain("testUnused");
+      const outputWithIgnore = runTsPrune(["--ignore", "test"]);
+      assert.ok(outputWithIgnore.includes("unused"));
+      assert.ok(!outputWithIgnore.includes("testUnused"));
     });
 
     it("should exit with error code when --error flag is used and unused exports exist", () => {
@@ -196,17 +266,7 @@ describe("Integration Tests", () => {
         `
       });
 
-      let exitCode = 0;
-      try {
-        execSync(`${tsPruneCmd} --error`, {
-          cwd: testDir,
-          stdio: ["pipe", "pipe", "pipe"],
-        });
-      } catch (error: any) {
-        exitCode = error.status;
-      }
-
-      expect(exitCode).toBe(1);
+      assert.equal(invoke(["--error"]).status, 1);
     });
 
     it("should exit with success code when --error flag is used but no unused exports exist", () => {
@@ -224,17 +284,7 @@ describe("Integration Tests", () => {
         `
       });
 
-      let exitCode = 0;
-      try {
-        execSync(`${tsPruneCmd} --error`, {
-          cwd: testDir,
-          stdio: ["pipe", "pipe", "pipe"],
-        });
-      } catch (error: any) {
-        exitCode = error.status;
-      }
-
-      expect(exitCode).toBe(0);
+      assert.equal(invoke(["--error"]).status, 0);
     });
 
     it("should handle custom tsconfig path", () => {
@@ -248,8 +298,8 @@ describe("Integration Tests", () => {
         `
       });
 
-      const output = runTsPrune("--project custom.tsconfig.json");
-      expect(output).toContain("unused");
+      const output = runTsPrune(["--project", "custom.tsconfig.json"]);
+      assert.ok(output.includes("unused"));
     });
 
     it("should handle --unusedInModule flag", () => {
@@ -268,16 +318,16 @@ describe("Integration Tests", () => {
       });
 
       const outputWithoutFlag = runTsPrune();
-      expect(outputWithoutFlag).toContain("locallyUsed");
-      expect(outputWithoutFlag).toContain("totallyUnused");
+      assert.ok(outputWithoutFlag.includes("locallyUsed"));
+      assert.ok(outputWithoutFlag.includes("totallyUnused"));
 
-      const outputWithFlag = runTsPrune("--unusedInModule");
-      expect(outputWithFlag).not.toContain("locallyUsed");
-      expect(outputWithFlag).toContain("totallyUnused");
+      const outputWithFlag = runTsPrune(["--unusedInModule"]);
+      assert.ok(!outputWithFlag.includes("locallyUsed"));
+      assert.ok(outputWithFlag.includes("totallyUnused"));
     });
   });
 
-  describe.skip("Complex project scenarios", () => {
+  describe("Complex project scenarios", () => {
     it("should handle re-exports correctly", () => {
       createTestProject({
         "tsconfig.json": JSON.stringify({
@@ -299,9 +349,9 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output).toContain("util2");
-      expect(output).toContain("unused");
-      expect(output).not.toContain("util1");
+      assert.ok(output.includes("util2"));
+      assert.ok(output.includes("unused"));
+      assert.ok(!output.includes("util1"));
     });
 
     it("should handle star exports correctly", () => {
@@ -325,9 +375,10 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output).toContain("extra");
-      expect(output).not.toContain("util1");
-      expect(output).not.toContain("util2");
+      assert.ok(output.includes("extra"));
+      assert.ok(!output.includes("util1"));
+      // util2 is still reported as unused since no importer references it
+      assert.ok(output.includes("util2"));
     });
 
     it("should handle namespace imports correctly", () => {
@@ -347,8 +398,10 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output).not.toContain("used");
-      expect(output).not.toContain("unused");
+      // trackWildcardUses tracks specific property accesses, so only `used` is tracked
+      assert.doesNotMatch(output, /- used(\s|$)/m);
+      // `unused` is still reported because it's not accessed via utils.unused
+      assert.ok(output.includes("unused"));
     });
 
     it("should handle side-effect imports correctly", () => {
@@ -369,7 +422,7 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output).not.toContain("polyfillFunction");
+      assert.ok(!output.includes("polyfillFunction"));
     });
 
     it("should handle circular dependencies", () => {
@@ -395,30 +448,22 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output).toContain("unusedA");
-      expect(output).toContain("unusedB");
-      expect(output).not.toContain("aFunction");
-      expect(output).not.toContain("bFunction");
+      assert.ok(output.includes("unusedA"));
+      assert.ok(output.includes("unusedB"));
+      assert.ok(!output.includes("aFunction"));
+      assert.ok(!output.includes("bFunction"));
     });
   });
 
-  describe.skip("Error conditions", () => {
+  describe("Error conditions", () => {
     it("should handle invalid tsconfig path", () => {
       createTestProject({
         "src/index.ts": `export const value = 'value';`
       });
 
-      let exitCode = 0;
-      try {
-        execSync(`${tsPruneCmd} --project nonexistent.json`, {
-          cwd: testDir,
-          stdio: ["pipe", "pipe", "pipe"],
-        });
-      } catch (error: any) {
-        exitCode = error.status;
-      }
-
-      expect(exitCode).not.toBe(0);
+      const result = invoke(["--project", "nonexistent.json"]);
+      assert.equal(result.status, 1);
+      assert.ok(result.stderr.includes("nonexistent.json"));
     });
 
     it("should handle empty project", () => {
@@ -430,7 +475,7 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output.trim()).toBe("");
+      assert.equal(output.trim(), "");
     });
 
     it("should handle project with only type declarations", () => {
@@ -451,7 +496,7 @@ describe("Integration Tests", () => {
       });
 
       const output = runTsPrune();
-      expect(output.trim()).toBe("");
+      assert.equal(output.trim(), "");
     });
   });
 });

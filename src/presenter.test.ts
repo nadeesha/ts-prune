@@ -1,28 +1,48 @@
+import assert from "node:assert/strict";
+import { afterEach, beforeEach, describe, it, mock } from "node:test";
 import { present, USED_IN_MODULE } from "./presenter";
 import { State } from "./state";
-import { AnalysisResultTypeEnum } from "./analyzer";
+import { AnalysisResultTypeEnum, IAnalysedResult } from "./analyzer";
 
 describe("presenter", () => {
-  let mockState: jest.Mocked<State>;
-  const originalCwd = process.cwd();
+  let state: State;
+  const setResults = (results: IAnalysedResult[]) => {
+    results.forEach((result) => state.onResult(result));
+  };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockState = {
-      definitelyUnused: jest.fn()
-    } as any;
-
-    // Mock process.cwd() to return a consistent value
-    jest.spyOn(process, 'cwd').mockReturnValue('/project');
+    state = new State();
+    mock.method(process, "cwd", () => "/project");
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    mock.restoreAll();
   });
 
   describe("present", () => {
+    it("formats Windows paths with the same relative slash output", () => {
+      mock.method(process, "cwd", () => "C:\\project");
+      setResults([
+        {
+          file: "C:\\project\\src\\utils.ts",
+          type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
+          symbols: [{ name: "unused", line: 1, usedInModule: false }],
+        },
+        {
+          file: "C:/project/src/types.ts",
+          type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
+          symbols: [{ name: "UnusedType", line: 2, usedInModule: false }],
+        },
+      ]);
+
+      assert.deepEqual(present(state), [
+        "src/utils.ts:1 - unused",
+        "src/types.ts:2 - UnusedType",
+      ]);
+    });
+
     it("should format output for unused exports", () => {
-      mockState.definitelyUnused.mockReturnValue([
+      setResults([
         {
           file: "/project/src/utils.ts",
           type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
@@ -33,16 +53,16 @@ describe("presenter", () => {
         }
       ]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toEqual([
+      assert.deepEqual(result, [
         "src/utils.ts:10 - unusedFunction",
         "src/utils.ts:15 - unusedVar"
       ]);
     });
 
     it("should handle exports used in module", () => {
-      mockState.definitelyUnused.mockReturnValue([
+      setResults([
         {
           file: "/project/src/utils.ts",
           type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
@@ -53,16 +73,16 @@ describe("presenter", () => {
         }
       ]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toEqual([
+      assert.deepEqual(result, [
         "src/utils.ts:5 - locallyUsed (used in module)",
         "src/utils.ts:10 - notUsed"
       ]);
     });
 
     it("should remove project root from file paths", () => {
-      mockState.definitelyUnused.mockReturnValue([
+      setResults([
         {
           file: "/project/src/components/Button.ts",
           type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
@@ -72,15 +92,15 @@ describe("presenter", () => {
         }
       ]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toEqual([
+      assert.deepEqual(result, [
         "src/components/Button.ts:1 - ButtonProps"
       ]);
     });
 
     it("should handle multiple files", () => {
-      mockState.definitelyUnused.mockReturnValue([
+      setResults([
         {
           file: "/project/src/utils.ts",
           type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
@@ -97,24 +117,24 @@ describe("presenter", () => {
         }
       ]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toEqual([
+      assert.deepEqual(result, [
         "src/utils.ts:5 - util1",
         "src/types.ts:2 - UnusedType"
       ]);
     });
 
     it("should handle empty results", () => {
-      mockState.definitelyUnused.mockReturnValue([]);
+      setResults([]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toEqual([]);
+      assert.deepEqual(result, []);
     });
 
     it("should handle files with no unused symbols", () => {
-      mockState.definitelyUnused.mockReturnValue([
+      setResults([
         {
           file: "/project/src/utils.ts",
           type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
@@ -122,13 +142,13 @@ describe("presenter", () => {
         }
       ]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toEqual([]);
+      assert.deepEqual(result, []);
     });
 
     it("should handle absolute paths outside project root", () => {
-      mockState.definitelyUnused.mockReturnValue([
+      setResults([
         {
           file: "/other/project/src/utils.ts",
           type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
@@ -138,15 +158,15 @@ describe("presenter", () => {
         }
       ]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toEqual([
+      assert.deepEqual(result, [
         "other/src/utils.ts:1 - externalUtil"
       ]);
     });
 
     it("should handle file paths with leading slash after cwd removal", () => {
-      mockState.definitelyUnused.mockReturnValue([
+      setResults([
         {
           file: "/project/utils.ts",
           type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
@@ -156,15 +176,15 @@ describe("presenter", () => {
         }
       ]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toEqual([
+      assert.deepEqual(result, [
         "utils.ts:1 - rootUtil"
       ]);
     });
 
     it("should format output without color codes", () => {
-      mockState.definitelyUnused.mockReturnValue([
+      setResults([
         {
           file: "/project/src/test.ts",
           type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
@@ -174,15 +194,15 @@ describe("presenter", () => {
         }
       ]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toEqual([
+      assert.deepEqual(result, [
         "src/test.ts:42 - testFunction (used in module)"
       ]);
     });
 
     it("should flatten results from multiple files correctly", () => {
-      mockState.definitelyUnused.mockReturnValue([
+      setResults([
         {
           file: "/project/file1.ts",
           type: AnalysisResultTypeEnum.POTENTIALLY_UNUSED,
@@ -200,18 +220,18 @@ describe("presenter", () => {
         }
       ]);
 
-      const result = present(mockState);
+      const result = present(state);
 
-      expect(result).toHaveLength(3);
-      expect(result[0]).toContain("file1.ts");
-      expect(result[1]).toContain("file1.ts");
-      expect(result[2]).toContain("file2.ts");
+      assert.equal((result).length, 3);
+      assert.ok((result[0]).includes("file1.ts"));
+      assert.ok((result[1]).includes("file1.ts"));
+      assert.ok((result[2]).includes("file2.ts"));
     });
   });
 
   describe("USED_IN_MODULE constant", () => {
     it("should have the correct value", () => {
-      expect(USED_IN_MODULE).toBe(" (used in module)");
+      assert.equal(USED_IN_MODULE, " (used in module)");
     });
   });
 });

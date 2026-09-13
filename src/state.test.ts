@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { State } from "./state";
 import { AnalysisResultTypeEnum } from "./analyzer";
 
@@ -19,7 +21,7 @@ describe("State", () => {
     ].forEach(result => state.onResult(result));
 
     it("should have definitelyUnused exports", () => {
-      expect(state.definitelyUnused().length).toBe(2);
+      assert.equal(state.definitelyUnused().length, 2);
     });
   });
 
@@ -40,7 +42,7 @@ describe("State", () => {
     ].forEach(result => state.onResult(result));
 
     it("should not have definitelyUnused exports", () => {
-      expect(state.definitelyUnused().length).toBe(0);
+      assert.equal(state.definitelyUnused().length, 0);
     });
   });
 });

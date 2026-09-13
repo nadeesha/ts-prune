@@ -8,7 +8,7 @@
  * Similar to lodash/fp/differenceBy
  */
 export function differenceBy<T>(
-  iteratee: (item: T) => any,
+  iteratee: (item: T) => unknown,
   array1: T[],
   array2: T[]
 ): T[] {
@@ -20,14 +20,14 @@ export function differenceBy<T>(
  * Creates an object composed of the picked object properties
  * Similar to lodash/fp/pick
  */
-export function pick<T extends Record<string, any>>(
+export function pick<T extends object>(
   keys: string[]
 ): (obj: T) => Partial<T> {
   return (obj: T) => {
     const result: Partial<T> = {};
     for (const key of keys) {
       if (key in obj) {
-        result[key as keyof T] = obj[key];
+        result[key as keyof T] = obj[key as keyof T];
       }
     }
     return result;
@@ -39,13 +39,22 @@ export function pick<T extends Record<string, any>>(
  * Similar to lodash/fp/countBy
  */
 export function countBy<T>(
-  iteratee: (item: T) => any
+  iteratee: (item: T) => unknown
 ): (array: T[]) => Record<string, number> {
   return (array: T[]) => {
     const result: Record<string, number> = {};
     for (const item of array) {
       const key = String(iteratee(item));
-      result[key] = (result[key] || 0) + 1;
+      if (Object.hasOwn(result, key)) {
+        result[key] += 1;
+      } else {
+        Object.defineProperty(result, key, {
+          value: 1,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        });
+      }
     }
     return result;
   };

@@ -1,0 +1,95 @@
+{
+  "source": "cosmiconfig8.3.6 from cached original tarball; captured before meta adapter implementation",
+  "scenarios": [
+    {
+      "files": {
+        ".config.json": "{\"cosmiconfig\":{\"searchPlaces\":[\"custom-{name}.json\"]}}",
+        "custom-ts-prune.json": "{\"ignore\":\"custom\"}"
+      },
+      "config": {
+        "ignore": "custom"
+      }
+    },
+    {
+      "files": {
+        ".config.json": "{\"cosmiconfig\":{\"searchPlaces\":[\"custom-{name}.json\"]},\"ts-prune\":{\"ignore\":\"inline\"}}",
+        "custom-ts-prune.json": "{\"ignore\":\"custom\"}"
+      },
+      "config": {
+        "ignore": "inline"
+      }
+    },
+    {
+      "files": {
+        ".config.json": "{\"cosmiconfig\":{\"searchPlaces\":[\"missing.json\"]}}",
+        ".ts-prunerc.json": "{\"ignore\":\"default\"}"
+      },
+      "config": null
+    },
+    {
+      "files": {
+        ".config.yaml": "cosmiconfig:\n  searchPlaces:\n    - custom-{name}.json\n",
+        "custom-ts-prune.json": "{\"ignore\":\"yaml\"}"
+      },
+      "config": {
+        "ignore": "yaml"
+      }
+    },
+    {
+      "files": {
+        ".config.json": "{}",
+        ".config.yaml": "cosmiconfig:\n  searchPlaces:\n    - custom-{name}.json\n",
+        "custom-ts-prune.json": "{\"ignore\":\"yaml\"}",
+        ".ts-prunerc.json": "{\"ignore\":\"default\"}"
+      },
+      "config": {
+        "ignore": "default"
+      }
+    },
+    {
+      "files": {
+        ".config.json": "{\"cosmiconfig\":{\"searchPlaces\":[\"custom.json\"],\"packageProp\":\"custom\"}}",
+        "custom.json": "{\"ignore\":\"custom\"}"
+      },
+      "config": {
+        "ignore": "custom"
+      }
+    },
+    {
+      "files": {
+        "package.json": "{\"cosmiconfig\":{},\"ts-prune\":{\"ignore\":\"package\"}}",
+        ".config.json": "{\"ts-prune\":{\"ignore\":\"legacy-inline\"}}"
+      },
+      "config": {
+        "ignore": "package"
+      }
+    },
+    {
+      "files": {
+        "package.json": "{\"ts-prune\":{\"ignore\":\"package\"}}",
+        ".config.json": "{\"ts-prune\":{\"ignore\":\"legacy-inline\"}}"
+      },
+      "config": {
+        "ignore": "legacy-inline"
+      }
+    },
+    {
+      "files": {
+        "package.json": "{\"cosmiconfig\":null,\"ts-prune\":{\"ignore\":\"package\"}}",
+        ".config.json": "{\"ts-prune\":{\"ignore\":\"legacy-inline\"}}"
+      },
+      "config": {
+        "ignore": "legacy-inline"
+      }
+    },
+    {
+      "files": {
+        "package.json": "{\"cosmiconfig\":false,\"ts-prune\":{\"ignore\":\"package\"}}",
+        ".config.json": "{\"ts-prune\":{\"ignore\":\"legacy-inline\"}}"
+      },
+      "config": {
+        "ignore": "package"
+      }
+    }
+  ]
+}

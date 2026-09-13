@@ -3,12 +3,15 @@ on:
   schedule:
     - cron:  '20 20 * * *'
 
+permissions:
+  contents: write
+
 jobs:
   add-contributors:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: BobAnkh/add-contributors@master
+    - uses: actions/checkout@v7.0.1
+    - uses: BobAnkh/add-contributors@v0.2.2
       with:
         CONTRIBUTOR: '### Contributors'
         COLUMN_PER_ROW: '6'

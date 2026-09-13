@@ -1,0 +1,85 @@
+{
+  "source": "cosmiconfig 8.3.6; captured before upgrade",
+  "scenarios": [
+    {
+      "filename": ".ts-prunerc",
+      "contents": "ignore: pattern\nerror: false\n",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    },
+    {
+      "filename": ".ts-prunerc.json",
+      "contents": "{\"ignore\":\"pattern\",\"error\":false}",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    },
+    {
+      "filename": ".ts-prunerc.yaml",
+      "contents": "ignore: pattern\nerror: false\n",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    },
+    {
+      "filename": ".ts-prunerc.yml",
+      "contents": "ignore: pattern\nerror: false\n",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    },
+    {
+      "filename": ".ts-prunerc.js",
+      "contents": "module.exports = {ignore:\"pattern\", error:false};",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    },
+    {
+      "filename": ".ts-prunerc.cjs",
+      "contents": "module.exports = {ignore:\"pattern\", error:false};",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    },
+    {
+      "filename": ".ts-prunerc.ts",
+      "contents": "export default {ignore:\"pattern\", error:false};",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    },
+    {
+      "filename": "package.json",
+      "contents": "{\"ts-prune\":{\"ignore\":\"pattern\",\"error\":false}}",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    },
+    {
+      "filename": ".config/ts-prunerc.json",
+      "contents": "{\"ignore\":\"pattern\",\"error\":false}",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    },
+    {
+      "filename": "ts-prune.config.cjs",
+      "contents": "module.exports = {ignore:\"pattern\", error:false};",
+      "config": {
+        "ignore": "pattern",
+        "error": false
+      }
+    }
+  ]
+}

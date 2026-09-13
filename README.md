@@ -1,19 +1,16 @@
 # ts-prune
 
-[![npm](https://img.shields.io/npm/v/ts-prune)](https://www.npmjs.com/package/ts-prune) [![npm](https://img.shields.io/npm/dm/ts-prune)](https://www.npmjs.com/package/ts-prune) [![GitHub issues](https://img.shields.io/github/issues/nadeesha/ts-prune)](https://github.com/nadeesha/ts-prune/issues)
+[![CI](https://github.com/nadeesha/ts-prune/actions/workflows/test.yml/badge.svg?branch=codex%2Frelease-0.11.0)](https://github.com/nadeesha/ts-prune/actions/workflows/test.yml?query=branch%3Acodex%2Frelease-0.11.0) [![npm](https://img.shields.io/npm/v/ts-prune)](https://www.npmjs.com/package/ts-prune) [![npm](https://img.shields.io/npm/dm/ts-prune)](https://www.npmjs.com/package/ts-prune) [![GitHub issues](https://img.shields.io/github/issues/nadeesha/ts-prune)](https://github.com/nadeesha/ts-prune/issues)
 
 **Find potentially unused exports in your TypeScript project with zero configuration.**
 
-## 📢 Maintenance Notice
+## Version 0.11
 
-> **ts-prune is now in maintenance mode** - For new projects, we recommend [knip](https://github.com/webpro/knip) which carries forward the same mission with more features.
+The 0.11 release updates ts-prune for current Node.js and TypeScript projects, reduces runtime dependencies, and fixes configuration precedence, locally used export filtering, and piped output truncation. The CLI options and CommonJS API remain compatible.
 
-ts-prune will continue to receive:
-- ✅ Critical bug fixes
-- ✅ Security updates
-- ✅ Dependency maintenance
+**Node.js 22.18 or newer is required.** Development uses Node 26, with CI covering Node 22, 24, and 26 on Linux and Node 26 on macOS and Windows. Projects using older Node versions should remain on the 0.10 release line.
 
-We will **not** be adding new features or accepting feature PRs. The tool remains stable and production-ready for existing users.
+The project has 256 automated tests and two direct runtime dependencies: ts-morph and cosmiconfig. See [release notes](RELEASE_NOTES.md) for the changes and [modernization results](MODERNIZATION.md) for the testing and dependency details.
 
 ## What is ts-prune?
 
@@ -145,6 +142,28 @@ Create `.ts-prunerc` (JSON), `.ts-prunerc.js`, or add to `package.json`:
   "project": "tsconfig.build.json"
 }
 ```
+
+Configuration precedence is defaults, then the discovered configuration file, then explicitly supplied CLI options. Boolean options accept `true` and `false`; for example, `"unusedInModule": false` keeps locally used exports in the output. Existing string values remain supported.
+
+## Development
+
+Use Node.js 26 for development (`nvm install && nvm use`). The package requires Node.js 22.18 or newer; CI tests Node 22, 24, and 26 on Linux and Node 26 on macOS and Windows.
+
+```bash
+npm ci
+npm run check           # lint, strict type checks, build, all tests
+npm run test:unit       # unit and configuration tests
+npm run test:integration
+npm run test:coverage   # Node's built-in coverage report
+npm run test:package    # pack, install production dependencies, test CLI/API
+npm run lint:fix        # explicit lint fixes
+```
+
+Tests use `node:test` and `node:assert/strict`. The test command compiles TypeScript into `.test-build/` and builds the CLI into `lib/`; neither directory is published as test code. Integration tests run in isolated temporary directories and require no global npm links. Coverage reports compiled source exercised by the test workers; CLI subprocess behavior is checked separately by integration tests. The package smoke test uses the npm registry to install runtime dependencies into a temporary consumer project.
+
+The build uses TypeScript 6.0.3 because the current TypeScript ESLint parser supports versions below 6.1. Upgrade the compiler to TypeScript 7 when the parser supports it. The analyzer uses the TypeScript compiler bundled with ts-morph independently of the build compiler.
+
+Runtime dependencies are limited to ts-morph for TypeScript analysis and cosmiconfig for configuration discovery and loading. CLI parsing, tsconfig reading, and tests use project code, the existing compiler, and Node built-ins. CI runs on pull requests, pushes to `master` and `codex/**` branches, and version tags. Tagged releases publish to npm only after the full test matrix passes. See [PUBLISHING.md](PUBLISHING.md) for the release process.
 
 ## Common Use Cases
 

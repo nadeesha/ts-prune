@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+import { beforeEach, describe, it } from "node:test";
 import { Project } from "ts-morph";
 import { isDefinitelyUsedImport } from "./isDefinitelyUsedImport";
 
@@ -5,7 +7,7 @@ describe("isDefinitelyUsedImport", () => {
   let project: Project;
 
   beforeEach(() => {
-    project = new Project();
+    project = new Project({ useInMemoryFileSystem: true });
   });
 
   describe("side-effect imports (definitely used)", () => {
@@ -15,7 +17,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(true);
+      assert.equal(result, true);
     });
 
     it("should return true for imports without import clause", () => {
@@ -24,7 +26,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(true);
+      assert.equal(result, true);
     });
 
     it("should return true for CSS/style imports", () => {
@@ -33,7 +35,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(true);
+      assert.equal(result, true);
     });
 
     it("should return true for multiple side-effect imports", () => {
@@ -46,7 +48,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecls = sourceFile.getImportDeclarations();
 
       importDecls.forEach(importDecl => {
-        expect(isDefinitelyUsedImport(importDecl)).toBe(true);
+        assert.equal(isDefinitelyUsedImport(importDecl), true);
       });
     });
   });
@@ -58,7 +60,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
 
     it("should return false for multiple named imports", () => {
@@ -67,7 +69,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
 
     it("should return false for renamed imports", () => {
@@ -76,7 +78,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
   });
 
@@ -87,7 +89,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
 
     it("should return false for mixed default and named imports", () => {
@@ -96,7 +98,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
   });
 
@@ -107,7 +109,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
 
     it("should return false for renamed namespace imports", () => {
@@ -116,7 +118,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
   });
 
@@ -127,7 +129,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
 
     it("should return false for type-only default imports", () => {
@@ -136,7 +138,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
 
     it("should return false for type-only namespace imports", () => {
@@ -145,7 +147,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
   });
 
@@ -156,7 +158,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(false);
+      assert.equal(result, false);
     });
   });
 
@@ -165,7 +167,7 @@ describe("isDefinitelyUsedImport", () => {
       const sourceFile = project.createSourceFile("/project/source.ts", "const module = import('./dynamic');");
 
       const importDecls = sourceFile.getImportDeclarations();
-      expect(importDecls).toHaveLength(0);
+      assert.equal((importDecls).length, 0);
     });
   });
 
@@ -181,11 +183,11 @@ describe("isDefinitelyUsedImport", () => {
 
       const importDecls = sourceFile.getImportDeclarations();
 
-      expect(isDefinitelyUsedImport(importDecls[0])).toBe(true);  // side-effect
-      expect(isDefinitelyUsedImport(importDecls[1])).toBe(false); // named
-      expect(isDefinitelyUsedImport(importDecls[2])).toBe(false); // default
-      expect(isDefinitelyUsedImport(importDecls[3])).toBe(false); // namespace
-      expect(isDefinitelyUsedImport(importDecls[4])).toBe(false); // type-only
+      assert.equal(isDefinitelyUsedImport(importDecls[0]), true);  // side-effect
+      assert.equal(isDefinitelyUsedImport(importDecls[1]), false); // named
+      assert.equal(isDefinitelyUsedImport(importDecls[2]), false); // default
+      assert.equal(isDefinitelyUsedImport(importDecls[3]), false); // namespace
+      assert.equal(isDefinitelyUsedImport(importDecls[4]), false); // type-only
     });
 
     it("should handle imports with complex module specifiers", () => {
@@ -198,7 +200,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecls = sourceFile.getImportDeclarations();
 
       importDecls.forEach(importDecl => {
-        expect(isDefinitelyUsedImport(importDecl)).toBe(true);
+        assert.equal(isDefinitelyUsedImport(importDecl), true);
       });
     });
 
@@ -210,7 +212,7 @@ describe("isDefinitelyUsedImport", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = isDefinitelyUsedImport(importDecl);
 
-      expect(result).toBe(true);
+      assert.equal(result, true);
     });
   });
 });

@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+import { beforeEach, describe, it } from "node:test";
 import { Project } from "ts-morph";
 import { getModuleSourceFile } from "./getModuleSourceFile";
 
@@ -5,18 +7,18 @@ describe("getModuleSourceFile", () => {
   let project: Project;
 
   beforeEach(() => {
-    project = new Project();
+    project = new Project({ useInMemoryFileSystem: true });
   });
 
   describe("with import declarations", () => {
     it("should return file path for valid module import", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "import { value } from './target';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should return null for non-existent module import", () => {
@@ -25,57 +27,57 @@ describe("getModuleSourceFile", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBeNull();
+      assert.equal(result, null);
     });
 
     it("should handle relative imports", () => {
-      const targetFile = project.createSourceFile("/project/nested/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/nested/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "import { value } from './nested/target';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/nested/target.ts");
+      assert.equal(result, "/project/nested/target.ts");
     });
 
     it("should handle parent directory imports", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/nested/source.ts", "import { value } from '../target';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should handle absolute imports", () => {
-      const targetFile = project.createSourceFile("/project/src/utils/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/src/utils/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/src/components/source.ts", "import { value } from '../utils/target';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/src/utils/target.ts");
+      assert.equal(result, "/project/src/utils/target.ts");
     });
 
     it("should handle star imports", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "import * as target from './target';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should handle default imports", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export default 'test';");
+      project.createSourceFile("/project/target.ts", "export default 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "import target from './target';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should handle side-effect only imports", () => {
@@ -85,30 +87,30 @@ describe("getModuleSourceFile", () => {
       const result = getModuleSourceFile(importDecl);
 
       // Should return null when target doesn't exist
-      expect(result).toBeNull();
+      assert.equal(result, null);
     });
 
     it("should handle imports with file extensions", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "import { value } from './target.js';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
       // ts-morph may resolve .js to .ts in some cases
-      expect(result).toEqual(expect.any(String));
+      assert.equal(result, "/project/target.ts");
     });
   });
 
   describe("with export declarations", () => {
     it("should return file path for valid re-export", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "export { value } from './target';");
 
       const exportDecl = sourceFile.getExportDeclarations()[0];
       const result = getModuleSourceFile(exportDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should return null for non-existent module re-export", () => {
@@ -117,37 +119,37 @@ describe("getModuleSourceFile", () => {
       const exportDecl = sourceFile.getExportDeclarations()[0];
       const result = getModuleSourceFile(exportDecl);
 
-      expect(result).toBeNull();
+      assert.equal(result, null);
     });
 
     it("should handle star re-exports", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "export * from './target';");
 
       const exportDecl = sourceFile.getExportDeclarations()[0];
       const result = getModuleSourceFile(exportDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should handle renamed re-exports", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "export { value as renamed } from './target';");
 
       const exportDecl = sourceFile.getExportDeclarations()[0];
       const result = getModuleSourceFile(exportDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should handle default re-exports", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export default 'test';");
+      project.createSourceFile("/project/target.ts", "export default 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "export { default } from './target';");
 
       const exportDecl = sourceFile.getExportDeclarations()[0];
       const result = getModuleSourceFile(exportDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should return null for local exports without module specifier", () => {
@@ -159,23 +161,23 @@ describe("getModuleSourceFile", () => {
       const exportDecl = sourceFile.getExportDeclarations()[0];
       const result = getModuleSourceFile(exportDecl);
 
-      expect(result).toBeNull();
+      assert.equal(result, null);
     });
   });
 
   describe("edge cases", () => {
     it("should handle TypeScript imports", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", "export type MyType = string;");
+      project.createSourceFile("/project/target.ts", "export type MyType = string;");
       const sourceFile = project.createSourceFile("/project/source.ts", "import type { MyType } from './target';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should handle mixed named and default imports", () => {
-      const targetFile = project.createSourceFile("/project/target.ts", `
+      project.createSourceFile("/project/target.ts", `
         export default 'default';
         export const named = 'named';
       `);
@@ -184,27 +186,27 @@ describe("getModuleSourceFile", () => {
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/target.ts");
+      assert.equal(result, "/project/target.ts");
     });
 
     it("should handle deeply nested imports", () => {
-      const targetFile = project.createSourceFile("/project/very/deeply/nested/target.ts", "export const value = 'test';");
+      project.createSourceFile("/project/very/deeply/nested/target.ts", "export const value = 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "import { value } from './very/deeply/nested/target';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/very/deeply/nested/target.ts");
+      assert.equal(result, "/project/very/deeply/nested/target.ts");
     });
 
     it("should handle index file imports", () => {
-      const indexFile = project.createSourceFile("/project/utils/index.ts", "export const util = 'test';");
+      project.createSourceFile("/project/utils/index.ts", "export const util = 'test';");
       const sourceFile = project.createSourceFile("/project/source.ts", "import { util } from './utils';");
 
       const importDecl = sourceFile.getImportDeclarations()[0];
       const result = getModuleSourceFile(importDecl);
 
-      expect(result).toBe("/project/utils/index.ts");
+      assert.equal(result, "/project/utils/index.ts");
     });
   });
 });

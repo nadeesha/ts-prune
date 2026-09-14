@@ -9,15 +9,16 @@ const formatOutput = (file: string, result: ResultSymbol) => {
 }
 
 export const present = (state: State): string[] => {
+  const currentDirectory = process.cwd().replaceAll("\\", "/");
   const unused2D = state
     .definitelyUnused()
     .map(result => ({
-      file: result.file.replace(process.cwd(), "").replace(new RegExp("^/"), ""),
+      file: result.file.replaceAll("\\", "/").replace(currentDirectory, "").replace(/^\//, ""),
       symbols: result.symbols
     }))
     .map(
       ({file, symbols}) => symbols.map(sym => formatOutput(file, sym))
     );
 
-  return [].concat.apply([], unused2D);
+  return unused2D.flat();
 };

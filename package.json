@@ -1,6 +1,6 @@
 {
   "name": "ts-prune",
-  "version": "0.10.4",
+  "version": "0.11.0",
   "description": "Find potentially unused exports in your Typescript project with zero configuration.",
   "keywords": [
     "find",
@@ -12,40 +12,36 @@
   "author": "Nadeesha Cabral <n@nadeesha.me>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "prepublish": "rm -rf lib && npm run build",
-    "pretest": "npm run lint",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
-    "test:integration": "sh integration/test.sh",
-    "lint": "eslint . --cache --fix --ext .ts,.tsx",
+    "build": "node scripts/build.cjs",
+    "prepack": "npm run build",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "node scripts/test.cjs",
+    "test:unit": "node scripts/test.cjs --unit",
+    "test:integration": "node scripts/test.cjs --integration",
+    "test:coverage": "node scripts/test.cjs --coverage",
+    "test:package": "node scripts/package-smoke.cjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "check": "npm run lint && npm run typecheck && npm test",
     "semantic-release": "semantic-release"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.4",
-    "@babel/preset-env": "^7.28.3",
-    "@babel/preset-typescript": "^7.27.1",
-    "@types/jest": "^25.2.1",
-    "@types/json5": "^0.0.30",
-    "@types/node": "^13.13.1",
-    "@typescript-eslint/parser": "^2.29.0",
-    "babel-jest": "^30.1.2",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.11.0",
-    "jest": "^25.4.0",
-    "prettier": "^2.0.5",
-    "semantic-release": "^21.0.1",
-    "ts-node": "^8.9.0",
-    "typescript": "^4.3.2"
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.2",
+    "@typescript-eslint/parser": "^8.70.0",
+    "eslint": "^10.10.0",
+    "semantic-release": "^25.0.9",
+    "typescript": "~6.0.3"
   },
   "dependencies": {
-    "commander": "^6.2.1",
-    "cosmiconfig": "^8.1.3",
-    "json5": "^2.1.3",
-    "ts-morph": "^13.0.1"
+    "cosmiconfig": "^10.0.1",
+    "ts-morph": "^28.0.0"
   },
   "files": [
-    "/lib"
+    "/lib",
+    "/RELEASE_NOTES.md",
+    "/PUBLISHING.md",
+    "/MODERNIZATION.md"
   ],
   "bin": "./lib/index.js",
   "repository": "git@github.com:nadeesha/ts-prune.git",
@@ -54,5 +50,8 @@
       "master"
     ]
   },
-  "types": "lib/index.d.ts"
+  "types": "lib/index.d.ts",
+  "engines": {
+    "node": ">=22.18.0"
+  }
 }

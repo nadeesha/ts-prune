@@ -1,7 +1,15 @@
+import assert from "node:assert/strict";
+import { afterEach, beforeEach, describe, it } from "node:test";
+import { mkdtempSync, realpathSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Project, ts } from "ts-morph";
 import {
+  analyze,
+  AnalysisResultTypeEnum,
   getExported,
   getPotentiallyUnused,
+  IAnalysedResult,
   importsForSideEffects,
   trackWildcardUses,
 } from "./analyzer";
@@ -54,21 +62,21 @@ describe("bar", () => {
 `;
 
 describe("analyzer", () => {
-  const project = new Project();
+  const project = new Project({ useInMemoryFileSystem: true });
   const foo = project.createSourceFile("/project/foo.ts", fooSrc);
   const useFoo = project.createSourceFile("/project/use-foo.ts", useFooSrc);
   const star = project.createSourceFile("/project/star.ts", starImportSrc);
   const bar = project.createSourceFile("/project/bar.ts", barSrc);
-  const testBar = project.createSourceFile("/project/bar.test.ts", testBarSrc);
+  project.createSourceFile("/project/bar.test.ts", testBarSrc);
   const starExport = project.createSourceFile("/project/starExport.ts", starExportSrc);
 
   it("should track import wildcards", () => {
     // TODO(danvk): rename this to importSideEffects()
-    expect(importsForSideEffects(star)).toEqual([]);
+    assert.deepEqual(importsForSideEffects(star), []);
   });
 
   it("should track named exports", () => {
-    expect(getExported(foo)).toEqual([
+    assert.deepEqual(getExported(foo), [
       { name: "x", line: 2 },
       { name: "y", line: 3 },
       { name: "z", line: 4 },
@@ -78,11 +86,31 @@ describe("analyzer", () => {
       { name: "UnusedT", line: 9 },
     ]);
 
-    expect(getExported(useFoo)).toEqual([{ name: "UseFoo", line: 2 }]);
+    assert.deepEqual(getExported(useFoo), [{ name: "UseFoo", line: 2 }]);
+  });
+
+  it("marks exports named after inherited object keys as used within their module", () => {
+    const keys = ["constructor", "toString", "hasOwnProperty", "__proto__"];
+    const file = project.createSourceFile("/project/inherited-key-exports.ts", keys.map((key) =>
+      `export const ${key} = 1; console.log(${key});`
+    ).join("\n"));
+    assert.deepEqual(getPotentiallyUnused(file).symbols, keys.map((name, index) => ({
+      name, line: index + 1, usedInModule: true,
+    })));
+  });
+
+  it("does not mark a single inherited-key declaration as used in its module", () => {
+    const keys = ["constructor", "toString", "hasOwnProperty", "__proto__"];
+    const file = project.createSourceFile("/project/unused-inherited-key-exports.ts", keys.map((key) =>
+      `export const ${key} = 1;`
+    ).join("\n"));
+    assert.deepEqual(getPotentiallyUnused(file).symbols, keys.map((name, index) => ({
+      name, line: index + 1, usedInModule: false,
+    })));
   });
 
   it("should track named imports", () => {
-    expect(getPotentiallyUnused(foo)).toEqual({
+    assert.deepEqual(getPotentiallyUnused(foo), {
       file: "/project/foo.ts",
       symbols: [
         { line: 8, name: "unusedC", usedInModule: false },
@@ -94,7 +122,7 @@ describe("analyzer", () => {
 
   it("should not skip source files without a pattern", () => {
     // while bar.test.ts is included, bar is used
-    expect(getPotentiallyUnused(bar)).toEqual({
+    assert.deepEqual(getPotentiallyUnused(bar), {
       file: "/project/bar.ts",
       symbols: [],
       type: 0,
@@ -103,7 +131,7 @@ describe("analyzer", () => {
 
   it("should skip source files matching a pattern", () => {
     // when bar.test.ts is exclude by the skip pattern, bar is unused
-    expect(getPotentiallyUnused(bar, /.test.ts/)).toEqual({
+    assert.deepEqual(getPotentiallyUnused(bar, /.test.ts/), {
       file: "/project/bar.ts",
       symbols: [
         { line: 2, name: "bar", usedInModule: false },
@@ -114,12 +142,12 @@ describe("analyzer", () => {
 
   it("should use line number of 'export * from' rather than line number of original export", () => {
     const result = getPotentiallyUnused(starExport);
-    expect(result.file).toBe("/project/starExport.ts");
-    expect(result.symbols.map(s => s.name)).toEqual(["unusedC", "UnusedT"]);
-    expect(result.type).toBe(0);
+    assert.equal(result.file, "/project/starExport.ts");
+    assert.deepEqual(result.symbols.map(s => s.name), ["unusedC", "UnusedT"]);
+    assert.equal(result.type, 0);
     // Line numbers may be undefined for re-exported symbols
     result.symbols.forEach(symbol => {
-      expect(typeof symbol.usedInModule).toBe("boolean");
+      assert.equal(typeof symbol.usedInModule, "boolean");
     });
   });
 
@@ -128,7 +156,7 @@ describe("analyzer", () => {
       ts.SyntaxKind.ImportDeclaration
     );
 
-    expect(trackWildcardUses(importNode)).toEqual(["x", "y", "z", "w", "ABC"]);
+    assert.deepEqual(trackWildcardUses(importNode), ["x", "y", "z", "w", "ABC"]);
   });
 
   describe("edge cases and error conditions", () => {
@@ -141,7 +169,7 @@ export const regularExport = 'regular';
       const ignoredFile = project.createSourceFile("/project/ignored.ts", ignoredSrc);
       const exported = getExported(ignoredFile);
 
-      expect(exported.map(e => e.name)).toContain("regularExport");
+      assert.ok((exported.map(e => e.name)).includes("regularExport"));
     });
 
     it("should handle trackWildcardUses with complex destructuring", () => {
@@ -156,9 +184,9 @@ const g = module['dynamickey'];
 
       const result = trackWildcardUses(importNode);
       // The actual behavior tracks specific property accesses
-      expect(result).toContain("a");
-      expect(result).toContain("e");
-      expect(result).toContain("dynamickey");
+      assert.ok((result).includes("a"));
+      assert.ok((result).includes("e"));
+      assert.ok((result).includes("dynamickey"));
     });
 
     it("should return wildcard for untrackable uses", () => {
@@ -170,7 +198,7 @@ const fn = (key: string) => module[key];
       const importNode = untrackedFile.getFirstDescendantByKindOrThrow(ts.SyntaxKind.ImportDeclaration);
 
       const result = trackWildcardUses(importNode);
-      expect(result).toEqual(["*"]);
+      assert.deepEqual(result, ["*"]);
     });
 
     it("should handle qualified name access in types", () => {
@@ -183,7 +211,7 @@ const value: Types.OtherType = {};
       const importNode = qualifiedFile.getFirstDescendantByKindOrThrow(ts.SyntaxKind.ImportDeclaration);
 
       const result = trackWildcardUses(importNode);
-      expect(result).toEqual(["SomeType", "OtherType"]);
+      assert.deepEqual(result, ["SomeType", "OtherType"]);
     });
 
     it("should handle element access with string literals", () => {
@@ -196,7 +224,7 @@ const b = module["doubleQuotes"];
       const importNode = elementFile.getFirstDescendantByKindOrThrow(ts.SyntaxKind.ImportDeclaration);
 
       const result = trackWildcardUses(importNode);
-      expect(result).toEqual(["stringKey", "doubleQuotes"]);
+      assert.deepEqual(result, ["stringKey", "doubleQuotes"]);
     });
 
     it("should handle variable declarations with object binding", () => {
@@ -208,7 +236,7 @@ const {prop1, prop2: renamed} = module;
       const importNode = bindingFile.getFirstDescendantByKindOrThrow(ts.SyntaxKind.ImportDeclaration);
 
       const result = trackWildcardUses(importNode);
-      expect(result).toEqual(["prop1", "prop2"]);
+      assert.deepEqual(result, ["prop1", "prop2"]);
     });
 
     it("should handle exports with different types", () => {
@@ -227,13 +255,13 @@ export default 'defaultExport';
       const exported = getExported(mixedFile);
 
       const exportNames = exported.map(e => e.name);
-      expect(exportNames).toContain("constExport");
-      expect(exportNames).toContain("functionExport");
-      expect(exportNames).toContain("ClassExport");
-      expect(exportNames).toContain("InterfaceExport");
-      expect(exportNames).toContain("TypeExport");
-      expect(exportNames).toContain("EnumExport");
-      expect(exportNames).toContain("default");
+      assert.ok((exportNames).includes("constExport"));
+      assert.ok((exportNames).includes("functionExport"));
+      assert.ok((exportNames).includes("ClassExport"));
+      assert.ok((exportNames).includes("InterfaceExport"));
+      assert.ok((exportNames).includes("TypeExport"));
+      assert.ok((exportNames).includes("EnumExport"));
+      assert.ok((exportNames).includes("default"));
     });
 
     it("should handle side-effect imports", () => {
@@ -242,11 +270,11 @@ import './side-effect-only';
 import {} from './empty-import';
 `;
       const sideEffectFile = project.createSourceFile("/project/side-effect.ts", sideEffectSrc);
-      const sideEffectTargetFile = project.createSourceFile("/project/side-effect-only.ts", "console.log('side effect');");
+      project.createSourceFile("/project/side-effect-only.ts", "console.log('side effect');");
       const sideEffects = importsForSideEffects(sideEffectFile);
 
       // Test passes if function returns array (behavior depends on module resolution)
-      expect(Array.isArray(sideEffects)).toBe(true);
+      assert.equal(Array.isArray(sideEffects), true);
     });
 
     it("should handle re-exports correctly", () => {
@@ -258,7 +286,7 @@ export { default as renamed } from './third';
       const reExportFile = project.createSourceFile("/project/re-export.ts", reExportSrc);
       const result = getPotentiallyUnused(reExportFile);
 
-      expect(result.file).toBe("/project/re-export.ts");
+      assert.equal(result.file, "/project/re-export.ts");
     });
 
     it("should handle nested object destructuring in imports", () => {
@@ -271,7 +299,7 @@ const {a: {b: {c: renamed}}} = module;
       const importNode = nestedFile.getFirstDescendantByKindOrThrow(ts.SyntaxKind.ImportDeclaration);
 
       const result = trackWildcardUses(importNode);
-      expect(result).toEqual(["outer", "a"]);
+      assert.deepEqual(result, ["outer", "a"]);
     });
 
     it("should handle dynamic imports correctly", () => {
@@ -282,7 +310,7 @@ const conditionalImport = condition ? import('./conditional') : null;
       const dynamicFile = project.createSourceFile("/project/dynamic.ts", dynamicImportSrc);
       const callExpressions = dynamicFile.getDescendantsOfKind(ts.SyntaxKind.CallExpression);
 
-      expect(callExpressions.length).toBeGreaterThan(0);
+      assert.ok((callExpressions.length) > 0);
     });
 
     it("should handle files with only type exports", () => {
@@ -294,7 +322,7 @@ export declare const declaredVar: string;
       const typesFile = project.createSourceFile("/project/types-only.ts", typesOnlySrc);
       const exported = getExported(typesFile);
 
-      expect(exported.map(e => e.name)).toEqual(["TypeA", "InterfaceB", "declaredVar"]);
+      assert.deepEqual(exported.map(e => e.name), ["TypeA", "InterfaceB", "declaredVar"]);
     });
 
     it("should handle namespace exports", () => {
@@ -307,7 +335,7 @@ export namespace MyNamespace {
       const namespaceFile = project.createSourceFile("/project/namespace.ts", namespaceSrc);
       const exported = getExported(namespaceFile);
 
-      expect(exported.map(e => e.name)).toContain("MyNamespace");
+      assert.ok((exported.map(e => e.name)).includes("MyNamespace"));
     });
 
     it("should handle module augmentation", () => {
@@ -322,7 +350,99 @@ export const localExport = 'value';
       const augmentFile = project.createSourceFile("/project/augment.ts", augmentationSrc);
       const exported = getExported(augmentFile);
 
-      expect(exported.map(e => e.name)).toContain("localExport");
+      assert.ok((exported.map(e => e.name)).includes("localExport"));
+    });
+  });
+
+  describe("analyze integration", () => {
+    let directory: string;
+
+    beforeEach(() => {
+      directory = realpathSync(mkdtempSync(join(tmpdir(), "ts-prune-analyzer-")));
+    });
+
+    afterEach(() => {
+      rmSync(directory, { recursive: true, force: true });
+    });
+
+    const createProject = (sources: Record<string, string>) => {
+      const project = new Project();
+      for (const [file, source] of Object.entries(sources)) {
+        project.createSourceFile(join(directory, file), source);
+      }
+      project.saveSync();
+      return project;
+    };
+
+    it("should emit tsconfig entrypoints as DEFINITELY_USED", () => {
+      const analyzeProject = createProject({
+        "entry.ts": "export const a = 1;",
+        "other.ts": "import { a } from './entry'; console.log(a);",
+      });
+
+      const results: IAnalysedResult[] = [];
+      const onResult = (result: IAnalysedResult) => results.push(result);
+
+      analyze(analyzeProject, onResult, [join(directory, "entry.ts")]);
+
+      const entrypointResult = results.find(
+        r => r.file === join(directory, "entry.ts") && r.type === AnalysisResultTypeEnum.DEFINITELY_USED
+      );
+      assert.ok(entrypointResult);
+      assert.deepEqual(entrypointResult!.symbols, []);
+    });
+
+    it("should filter source files matching skip pattern", () => {
+      const analyzeProject = createProject({
+        "lib.ts": "export const lib = 1;",
+        "lib.test.ts": "import { lib } from './lib'; console.log(lib);",
+      });
+
+      const resultsWithoutSkip: IAnalysedResult[] = [];
+      analyze(analyzeProject, (r) => resultsWithoutSkip.push(r), []);
+
+      const resultsWithSkip: IAnalysedResult[] = [];
+      analyze(analyzeProject, (r) => resultsWithSkip.push(r), [], "\\.test\\.ts");
+
+      // With skip pattern, test files are excluded from analysis
+      const skippedFileNames = resultsWithSkip.map(r => r.file);
+      assert.ok(skippedFileNames.every((file) => !file.includes(".test.ts")));
+      assert.ok(resultsWithoutSkip.some((result) => result.file.includes(".test.ts")));
+    });
+
+    it("should treat dynamic imports as wildcard (all exports used)", () => {
+      const analyzeProject = createProject({
+        "target.ts": "export const a = 1; export const b = 2;",
+        "consumer.ts": "const mod = import('./target');",
+      });
+
+      const results: IAnalysedResult[] = [];
+      analyze(analyzeProject, (r) => results.push(r), []);
+
+      // Dynamic import treats all exports as used (wildcard)
+      const targetResult = results.find(
+        r => r.file.includes("target.ts") && r.type === AnalysisResultTypeEnum.POTENTIALLY_UNUSED
+      );
+      assert.ok(targetResult);
+      assert.deepEqual(targetResult!.symbols, []);
+    });
+
+    it("should handle export * from unresolvable module without crashing", () => {
+      const analyzeProject = createProject({
+        "reexport.ts": "export * from './nonexistent'; export const localExport = 1;",
+      });
+
+      const results: IAnalysedResult[] = [];
+      assert.doesNotThrow(() => {
+        analyze(analyzeProject, (r) => results.push(r), []);
+      });
+
+      // localExport should still be reported
+      const reexportResult = results.find(
+        r => r.file.includes("reexport.ts") && r.type === AnalysisResultTypeEnum.POTENTIALLY_UNUSED
+      );
+      assert.ok(reexportResult);
+      assert.ok((reexportResult!.symbols.map(s => s.name)).includes("localExport"));
     });
   });
 });

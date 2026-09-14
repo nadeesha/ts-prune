@@ -6,14 +6,14 @@ export { ResultSymbol } from "./analyzer";
 import { getConfig } from "./configurator";
 import { run } from "./runner";
 
-// Only run CLI logic when this file is executed directly
-if (require.main === module) {
-    const config = getConfig();
-    const resultCount = run(config);
+export const runCli = () => {
+  const config = getConfig();
+  const resultCount = run(config);
 
-    if (resultCount > 0 && config.error){
-        process.exit(1);
-    } else {
-        process.exit(0);
-    }
+  // Let Node flush stdout before exiting, including when output is piped.
+  process.exitCode = resultCount > 0 && config.error ? 1 : 0;
+};
+
+if (require.main === module) {
+  runCli();
 }

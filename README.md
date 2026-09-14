@@ -1,240 +1,182 @@
 # ts-prune
 
-[![npm](https://img.shields.io/npm/v/ts-prune)](https://www.npmjs.com/package/ts-prune) [![npm](https://img.shields.io/npm/dm/ts-prune)](https://www.npmjs.com/package/ts-prune) [![GitHub issues](https://img.shields.io/github/issues/nadeesha/ts-prune)](https://github.com/nadeesha/ts-prune/issues)
+[![CI](https://github.com/nadeesha/ts-prune/actions/workflows/test.yml/badge.svg)](https://github.com/nadeesha/ts-prune/actions/workflows/test.yml)
+[![npm version](https://img.shields.io/npm/v/ts-prune)](https://www.npmjs.com/package/ts-prune)
+[![Monthly downloads](https://img.shields.io/npm/dm/ts-prune)](https://www.npmjs.com/package/ts-prune)
+[![Node.js requirement](https://img.shields.io/badge/node-%3E%3D22.18.0-339933)](#requirements)
+[![License: MIT](https://img.shields.io/npm/l/ts-prune)](package.json)
 
-**Find potentially unused exports in your TypeScript project with zero configuration.**
+Find potentially unused exports in your TypeScript project. ts-prune reads your `tsconfig.json` and reports exports with no detected use elsewhere in the project. It reports findings without changing your files.
 
-## 📢 Maintenance Notice
+## Requirements
 
-> **ts-prune is now in maintenance mode** - For new projects, we recommend [knip](https://github.com/webpro/knip) which carries forward the same mission with more features.
+Node.js 22.18 or newer and a TypeScript project with a `tsconfig.json`. JavaScript files are supported when `allowJs` is enabled in that configuration.
 
-ts-prune will continue to receive:
-- ✅ Critical bug fixes
-- ✅ Security updates
-- ✅ Dependency maintenance
+## Quick start
 
-We will **not** be adding new features or accepting feature PRs. The tool remains stable and production-ready for existing users.
+Install with your package manager:
 
-## What is ts-prune?
-
-ts-prune is a simple, fast tool that finds exported TypeScript/JavaScript code that isn't being used anywhere in your project. It helps you:
-
-- 🧹 **Clean up dead code** - Remove exports that serve no purpose
-- 📦 **Reduce bundle size** - Eliminate unused code from your builds  
-- 🔍 **Improve code quality** - Keep your codebase lean and maintainable
-- ⚡ **Zero configuration** - Works out of the box with any TypeScript project
-
-## Quick Start
-
-### Installation
-
-```bash
-# npm
+```sh
 npm install --save-dev ts-prune
-
-# yarn  
+# or
 yarn add --dev ts-prune
-
-# pnpm
+# or
 pnpm add --save-dev ts-prune
 ```
 
-### Basic Usage
+Run from your project root:
 
-```bash
-# Run in your project root
+```sh
 npx ts-prune
 ```
 
-**Example output:**
-```
-src/components/Button.ts:15 - ButtonVariant
-src/utils/helpers.ts:8 - formatCurrency  
-src/types/user.ts:12 - UserRole
-src/api/client.ts:45 - ApiResponse
+For a different TypeScript configuration:
+
+```sh
+npx ts-prune --project tsconfig.build.json
 ```
 
-Each line shows: `file:line - exportName`
+## Example
 
-## Examples
-
-### Example 1: Finding Unused Exports
-
-Given these files:
+Given `src/math.ts`:
 
 ```typescript
-// src/utils/math.ts
 export const add = (a: number, b: number) => a + b;
-export const subtract = (a: number, b: number) => a - b;  // unused
-export const multiply = (a: number, b: number) => a * b;  // unused
+export const subtract = (a: number, b: number) => a - b;
+export const multiply = (a: number, b: number) => a * b;
+```
 
-// src/app.ts  
-import { add } from './utils/math';
+And `src/app.ts`:
+
+```typescript
+import { add } from './math';
 console.log(add(2, 3));
 ```
 
-Running `ts-prune` outputs:
-```
-src/utils/math.ts:2 - subtract
-src/utils/math.ts:3 - multiply
-```
+ts-prune reports:
 
-### Example 2: Ignoring Specific Exports
-
-Use `// ts-prune-ignore-next` to ignore specific exports:
-
-```typescript
-// src/api/types.ts
-export interface User {
-  id: string;
-  name: string;
-}
-
-// ts-prune-ignore-next
-export interface AdminUser extends User {  // ignored by ts-prune
-  permissions: string[];
-}
-
-export interface Customer {  // will be flagged if unused
-  customerId: string;
-}
+```text
+src/math.ts:2 - subtract
+src/math.ts:3 - multiply
 ```
 
-### Example 3: Working with Different File Types
+Each line is `file:line - exportName`. Exports referenced within their own file are marked `(used in module)`; use `--unusedInModule` to hide them. Re-exports may show `undefined` as the line number when the declaration is in another file.
 
-ts-prune works with various TypeScript patterns:
+## CLI options
 
-```typescript
-// Default exports
-export default class MyClass {}
+| Option | Description | Example |
+| --- | --- | --- |
+| `-p, --project [path]` | TypeScript configuration; defaults to `tsconfig.json` | `ts-prune -p tsconfig.build.json` |
+| `-i, --ignore [regexp]` | Hide matching output lines | `ts-prune -i 'test\|spec'` |
+| `-s, --skip [regexp]` | Exclude matching files from analysis and from references counted as uses | `ts-prune -s '\.test\.ts$'` |
+| `-e, --error` | Exit with status 1 if any findings remain after filtering | `ts-prune -e` |
+| `-u, --unusedInModule` | Hide exports marked `(used in module)` | `ts-prune -u` |
+| `-h, --help` | Show help | `ts-prune -h` |
 
-// Named exports  
-export const myFunction = () => {};
-export type MyType = string;
-export interface MyInterface {}
+`--ignore` filters the report; `--skip` changes the analysis. For example, skipping tests allows exports used only by tests to appear as unused. Patterns are JavaScript regular expressions, not globs.
 
-// Re-exports
-export { SomethingElse } from './other-file';
-export * from './barrel-file';
-```
+Without `--error`, findings do not cause a nonzero exit status. Configuration and execution errors still fail the command.
 
 ## Configuration
 
-### CLI Options
-
-```bash
-ts-prune [options]
-```
-
-| Option | Description | Example |
-|--------|-------------|---------|
-| `-p, --project` | Path to tsconfig.json | `ts-prune -p tsconfig.build.json` |
-| `-i, --ignore` | Ignore pattern (RegExp) | `ts-prune -i "test\|spec"` |
-| `-s, --skip` | Skip files pattern | `ts-prune -s "\.test\.ts$"` |
-| `-e, --error` | Exit with error code if unused exports found | `ts-prune -e` |
-| `-u, --unusedInModule` | Skip exports marked as "used in module" | `ts-prune -u` |
-
-### Configuration File
-
-Create `.ts-prunerc` (JSON), `.ts-prunerc.js`, or add to `package.json`:
+Create `.ts-prunerc.json`:
 
 ```json
 {
+  "project": "tsconfig.build.json",
   "ignore": "components/(Button|Input)",
   "skip": "\\.test\\.|test/",
-  "project": "tsconfig.build.json"
+  "unusedInModule": false
 }
 ```
 
-## Common Use Cases
+Or use the `ts-prune` property in `package.json`:
 
-### 1. CI/CD Integration
+```json
+{
+  "ts-prune": {
+    "project": "tsconfig.build.json",
+    "error": true
+  }
+}
+```
 
-Add to your package.json:
+Configuration discovery also supports `.ts-prunerc` (JSON or YAML), `.ts-prunerc.yaml`, `.ts-prunerc.yml`, and JS, CJS, or TS configuration files such as `.ts-prunerc.cjs`:
+
+```javascript
+module.exports = {
+  project: 'tsconfig.build.json',
+  unusedInModule: true,
+};
+```
+
+Use `export default` in TypeScript configuration files. Discovery starts in the working directory and searches parent directories until it reaches the home directory or filesystem root. Within a directory, the `ts-prune` property in `package.json` takes precedence over the standard configuration files. Project paths are resolved from the working directory.
+
+Options are applied in this order: defaults, discovered configuration, explicitly supplied CLI options. In configuration files, use booleans for `error` and `unusedInModule`; `false` disables them. Legacy string values remain accepted, but the string `"false"` does not disable a flag.
+
+## Ignoring an export
+
+Place `// ts-prune-ignore-next` immediately before its declaration:
+
+```typescript
+// ts-prune-ignore-next
+export interface PublicApi {
+  name: string;
+}
+```
+
+Files explicitly listed in the selected tsconfig's `files` array are treated as public entrypoints: their exports are excluded from the report. Files selected through `include` are analyzed normally.
+
+## Using ts-prune in CI
+
+Add a script to `package.json`:
+
 ```json
 {
   "scripts": {
-    "deadcode": "ts-prune",
-    "deadcode:ci": "ts-prune --error"
+    "deadcode": "ts-prune --error"
   }
 }
 ```
 
-### 2. Pre-commit Hook
-
-```json
-{
-  "husky": {
-    "hooks": {
-      "pre-commit": "ts-prune --error"
-    }
-  }
-}
-```
-
-### 3. Count Unused Exports
-
-```bash
-ts-prune | wc -l
-```
-
-### 4. Filter Results
-
-```bash
-# Ignore test files
-ts-prune | grep -v "\.test\."
-
-# Only show specific directories  
-ts-prune | grep "src/components"
-
-# Ignore multiple patterns
-ts-prune | grep -v -E "(test|spec|stories)"
-```
-
-## Understanding the Output
-
-ts-prune categorizes exports into different types:
-
-- **Regular unused export**: `src/file.ts:10 - exportName`
-- **Used in module**: `src/file.ts:5 - localHelper (used in module)` 
-  - Export is only used within the same file
-  - Use `-u` flag to ignore these
+Run `npm run deadcode` in CI to fail when findings remain. Add `--unusedInModule` if you only want exports without detected local uses.
 
 ## Limitations
 
-- **Dynamic imports**: `import('./dynamic-file')` usage might not be detected
-- **String-based imports**: `require('module-name')` patterns
-- **Framework magic**: Some frameworks use exports through reflection
-- **Configuration files**: Exports in config files might appear unused
+Review findings before deleting code:
 
-For these cases, use `// ts-prune-ignore-next` or configure ignore patterns.
+- Frameworks and build tools may consume exports through conventions or reflection that ts-prune cannot detect.
+- Imports with computed paths cannot reliably be resolved. Resolved literal dynamic imports, such as `import('./module')`, conservatively mark all exports in that module as used.
+- Namespace uses that cannot be tracked, side-effect imports, and wildcard re-exports can keep unused exports out of the report.
+- Uses outside the configured project are not visible. Mark public entrypoints or ignore exports consumed elsewhere.
 
-## FAQ
+## Development
 
-### How accurate is ts-prune?
+Use the Node version in `.nvmrc`:
 
-ts-prune is conservative and may show false positives for:
-- Dynamically imported modules
-- Framework-specific patterns (Angular services, React lazy loading)
-- Build tool configurations
-
-### Can I use this with JavaScript?
-
-Yes! ts-prune works with `.js` files in TypeScript projects. Ensure your `tsconfig.json` includes JavaScript files:
-
-```json
-{
-  "compilerOptions": {
-    "allowJs": true
-  }
-}
+```sh
+nvm install
+nvm use
+npm ci
+npm run check           # lint, strict type checks, build, all tests
+npm run test:unit
+npm run test:integration
+npm run test:coverage   # Node's built-in coverage report
+npm run test:package    # install a tarball and check its CLI and API
+npm run lint:fix        # apply lint fixes
 ```
+
+Tests use `node:test` and `node:assert/strict`. Test compilation goes into `.test-build/`; the published CLI and CommonJS library are built into `lib/`. Integration tests run in temporary directories without global npm links. Coverage measures compiled source in test workers; CLI subprocess behavior is checked separately. The package smoke test installs production dependencies from npm into a temporary consumer project.
+
+Development uses Node 26. CI tests Node 22, 24, and 26 on Linux and Node 26 on macOS and Windows. It runs on pull requests, pushes to `master` and `codex/**`, and version tags. Publishing is manual: choose **Actions → Release → Run workflow** and enter an existing version tag. The release reruns the full matrix before publishing; pushes and tags alone do not publish. See [PUBLISHING.md](PUBLISHING.md) for setup and release steps.
+
+The build uses TypeScript 6.0.3 while the TypeScript ESLint parser requires a compiler version below 6.1. TypeScript 7 is deferred until the parser supports it. The analyzer uses the compiler bundled with ts-morph independently. Runtime dependencies are ts-morph and cosmiconfig. See [MODERNIZATION.md](MODERNIZATION.md) for dependency counts and verification results.
 
 ## Acknowledgements
 
-Built with the excellent [ts-morph](https://github.com/dsherret/ts-morph) library and inspired by [this approach](https://gist.github.com/dsherret/0bae87310ce24866ae22425af80a9864) by [@dsherret](https://github.com/dsherret).
+Built with [ts-morph](https://github.com/dsherret/ts-morph) and inspired by [@dsherret's approach](https://gist.github.com/dsherret/0bae87310ce24866ae22425af80a9864).
 
-## Contributors
+### Contributors
 
 <table>
 <tr>
@@ -414,3 +356,7 @@ Built with the excellent [ts-morph](https://github.com/dsherret/ts-morph) librar
     </td>
 </tr>
 </table>
+
+## Project status
+
+This project has been resurrected after a long hiatus. Many projects still depend on ts-prune, and by now it seems to be encoded in AI model weights too. It needs to keep working.

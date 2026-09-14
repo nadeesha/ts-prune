@@ -1,171 +1,64 @@
-# Publishing Guide
+# Publishing
 
-This guide describes how to publish new versions of ts-prune to npm from your local machine using semantic-release.
+Publishing is manual. The `Test` workflow runs automatically on pull requests, pushes to `master` and `codex/**`, and `v*` tags. It has no publishing job or publishing credentials. The separate `Release` workflow publishes only when you start it with **Run workflow** or `gh workflow run`.
 
-## How Semantic Release Works
+## One-time setup
 
-Semantic-release automates the version management and package publishing by analyzing your git commit messages. It:
-1. Analyzes commits since the last release
-2. Determines the version bump type (major, minor, or patch) based on commit messages
-3. Creates a new git tag and GitHub release
-4. Publishes to npm
+Merge the workflow changes into `master`. GitHub requires a workflow with `workflow_dispatch` to exist on the default branch before it can be started manually. See [GitHub's manual workflow documentation](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
 
-### Commit Message Format
+Prefer [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) for authentication. In the ts-prune package settings on npm, configure:
 
-Follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
+- GitHub owner: `nadeesha`
+- Repository: `ts-prune`
+- Workflow filename: `release.yml`
+- Allow direct publishing with `npm publish`.
 
-- `fix:` - Bug fixes (triggers PATCH release: 0.10.4 → 0.10.5)
-- `feat:` - New features (triggers MINOR release: 0.10.4 → 0.11.0)
-- `BREAKING CHANGE:` in commit body or `!` after type (triggers MAJOR release: 0.10.4 → 1.0.0)
-- Other types (`docs:`, `chore:`, `style:`, `refactor:`, `test:`) don't trigger releases
+The workflow requests an OIDC token only in the publishing job and publishes with provenance. If an existing trusted publisher names `test.yml`, replace it with one for `release.yml`. Alternatively, the workflow accepts the repository's `NPM_TOKEN` secret, falling back to `NPM_AUTH_TOKEN` if the first is absent. Tokens must have publish access to ts-prune and satisfy npm's authentication requirements.
 
-Examples:
-```bash
-git commit -m "fix: resolve issue with unused export detection"
-git commit -m "feat: add support for TypeScript 5.0"
-git commit -m "feat!: change CLI interface"
+## Prepare a version
+
+Use the Node version in `.nvmrc`. On a release branch, update the package version and `RELEASE_NOTES.md`. Update the README if usage or requirements changed; it does not need a release announcement for every version.
+
+```sh
+npm version minor --no-git-tag-version --ignore-scripts
+npm ci
+npm run check
+npm run test:coverage
+npm run test:package
+npm audit
 ```
 
-## Prerequisites
+Commit and push the changes, then wait for CI. The package smoke test installs a tarball with production dependencies in a temporary project and verifies the CLI, CommonJS API, executable shim, and declarations. `prepack` rebuilds the package before publishing.
 
-### 1. Required Tokens
+Create an annotated version tag on the commit you intend to publish. The tag must match `package.json`: a package version of `1.2.3` requires `v1.2.3`. Push that tag when ready. Tag creation and pushes run tests but do not publish with the updated workflows.
 
-You need two authentication tokens set as environment variables:
+Use a new tag for each version. Do not move existing release tags. The release workflow accepts stable versions; prerelease tags are rejected because this workflow publishes to npm's `latest` dist-tag.
 
-#### GitHub Token
-Create a personal access token with `repo` scope at https://github.com/settings/tokens
+## Publish when ready
 
-```bash
-export GITHUB_TOKEN=your_github_token_here
+1. Open **Actions → Release → Run workflow**.
+2. Select the branch whose current commit matches the tag (for example, the release branch, or `master` if the tag points to its latest commit).
+3. Enter the existing version tag to publish.
+4. Click **Run workflow**.
+
+The equivalent CLI command is:
+
+```sh
+gh workflow run release.yml --ref v1.2.3 -f tag=v1.2.3
 ```
 
-#### NPM Token
-Create an automation token at https://www.npmjs.com/settings/your-username/tokens
+The workflow resolves that tag to a commit and checks its package name and version. It then reruns the shared test matrix on that exact commit: Node 22/24/26 on Linux, and Node 26 on macOS and Windows. Only after all checks pass does it install dependencies, rebuild, publish to npm with provenance, and create the GitHub release from the tagged `RELEASE_NOTES.md`.
 
-```bash
-export NPM_TOKEN=your_npm_token_here
-```
+The branch selected in the UI supplies the workflow definition; the tag input selects the code being released. Their commits must match because npm provenance records the workflow's commit. If the branch has moved on, use the CLI command above to run directly from the tag. The selected commit must contain `release.yml` and its supporting scripts. Publishing uses the tested commit, and fails if the tag has moved during the run. Release runs are serialized so two publishes cannot run concurrently.
 
-### 2. Verify Setup
+## Check the result or retry
 
-Check that all tokens are properly configured:
+After success, verify the npm version and `latest` dist-tag, the GitHub release, and the tagged commit.
 
-```bash
-make check-tokens  # Verifies both GITHUB_TOKEN and NPM_TOKEN are set
-make check-auth    # Verifies npm authentication
-```
+If authentication fails before npm accepts the package, fix the trusted publisher or repository secret, then rerun the failed `Release` job. Never paste tokens into issues, commits, or logs. Do not rerun the old `Test` workflow's publishing job: historical workflow runs retain the old publishing behavior.
 
-### 3. Clean Working Directory
+If npm succeeded but GitHub release creation failed, create the GitHub release for the existing tag separately. Do not attempt to publish the same npm version again.
 
-Ensure your git working directory is clean and you're on the master branch:
+## Existing semantic-release tooling
 
-```bash
-git checkout master
-git pull origin master
-git status  # Should show no uncommitted changes
-```
-
-## Publishing Process
-
-### 1. Dry Run (Recommended)
-
-First, do a dry run to see what semantic-release would do without actually publishing:
-
-```bash
-make publish-dry
-```
-
-This will:
-- Analyze commit messages since the last release
-- Show what version would be published
-- Display what changes would be included
-- NOT actually publish anything
-
-### 2. Publish
-
-Once you're satisfied with the dry run results:
-
-```bash
-make publish
-```
-
-This will:
-1. Clean build artifacts
-2. Run all tests (unit and integration)
-3. Build the TypeScript project
-4. Run semantic-release, which will:
-   - Analyze commits since last release
-   - Determine if a release is needed
-   - Calculate the new version number
-   - Update package.json
-   - Create a git tag
-   - Create a GitHub release with release notes
-   - Publish to npm
-   - Push changes back to GitHub
-
-## Manual Semantic Release (Advanced)
-
-If you need more control, you can run semantic-release directly:
-
-```bash
-# Dry run with debug output
-npm run semantic-release -- --dry-run --debug
-
-# Run with specific configuration
-npm run semantic-release -- --no-ci
-
-# Run from a specific branch
-npm run semantic-release -- --branches my-branch
-```
-
-## Troubleshooting
-
-### No Release Published
-
-If semantic-release doesn't publish anything:
-- Check that you have qualifying commits (`fix:`, `feat:`, etc.) since the last release
-- Verify you're on the correct branch (master)
-- Run with debug flag: `npm run semantic-release -- --dry-run --debug`
-
-### Token Issues
-
-If you get authentication errors:
-
-```bash
-# Check tokens are set
-make check-tokens
-
-# Re-export tokens if needed
-export GITHUB_TOKEN=ghp_xxxxxxxxxxxx
-export NPM_TOKEN=npm_xxxxxxxxxxxx
-```
-
-### Build or Test Failures
-
-The publish process will stop if tests or build fail:
-
-```bash
-# Run tests separately
-make test
-
-# Build separately
-make build
-```
-
-## Post-Publish
-
-After successful publishing, semantic-release will have:
-
-1. Updated the version in package.json
-2. Created a git tag (e.g., v0.11.0)
-3. Created a GitHub release with changelog
-4. Published the package to npm
-5. Pushed all changes to GitHub
-
-You can verify the release:
-- Check npm: https://www.npmjs.com/package/ts-prune
-- Check GitHub releases: https://github.com/nadeesha/ts-prune/releases
-
-## CI/CD Note
-
-The GitHub Actions workflow now only runs tests and builds on push to master. All publishing must be done manually from a local machine using this guide to ensure proper review and control over releases.
+The `semantic-release` script and Makefile publishing targets remain available for the original local `master` workflow. They run only when explicitly invoked and are separate from the manual GitHub Actions release process. Use one publishing path per version.

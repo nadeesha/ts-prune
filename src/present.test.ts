@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { State } from "./state";
 import { AnalysisResultTypeEnum } from "./analyzer";
 import { present } from "./presenter";
@@ -20,9 +22,7 @@ describe("present", () => {
     ].forEach((result) => state.onResult(result));
 
     it("should produce a presentable output", () => {
-      expect(JSON.stringify(present(state))).toMatchInlineSnapshot(
-        `"[\\"foo.ts:0 - foo\\",\\"bar.ts:0 - bar\\"]"`
-      );
+      assert.deepEqual(present(state), ["foo.ts:0 - foo", "bar.ts:0 - bar"]);
     });
   });
 
@@ -43,7 +43,7 @@ describe("present", () => {
     ].forEach((result) => state.onResult(result));
 
     it("should produce an empty output", () => {
-      expect(JSON.stringify(present(state))).toBe(JSON.stringify([]));
+      assert.equal(JSON.stringify(present(state)), JSON.stringify([]));
     });
   });
 
@@ -64,9 +64,9 @@ describe("present", () => {
     ].forEach((result) => state.onResult(result));
 
     it("should produce a presentable output", () => {
-      expect(JSON.stringify(present(state))).toMatchInlineSnapshot(
-        `"[\\"foo.ts:0 - foo (used in module)\\",\\"bar.ts:0 - bar\\"]"`
-      );
+      assert.deepEqual(present(state), [
+        "foo.ts:0 - foo (used in module)", "bar.ts:0 - bar",
+      ]);
     });
   });
 });

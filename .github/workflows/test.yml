@@ -3,25 +3,48 @@ name: Test
 on:
   pull_request:
   push:
-    branches:
-      - master
+    branches: [master, "codex/**"]
+    tags: ["v*"]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit to validate for a manual release
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
 
 jobs:
   test:
-    name: test
-    runs-on: ubuntu-latest
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: [22, 24, 26]
+        include:
+          - os: macos-latest
+            node: 26
+          - os: windows-latest
+            node: 26
     steps:
-      - name: Git Checkout
-        uses: actions/checkout@v4
-      - name: Setup node version
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
         with:
-          node-version: "20"
-      - name: Install dependencies
-        run: npm ci
-      - name: Build typescript
-        run: npm run build
-      - name: Unit tests
-        run: npm test
-      - name: Integration tests
-        run: npm run test:integration
+          ref: ${{ inputs.ref || github.sha }}
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run test:package
+      - name: Coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 26
+        run: npm run test:coverage
+      - name: Audit production dependencies
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 26
+        run: npm audit --omit=dev
